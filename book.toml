@@ -3,6 +3,3 @@ authors = ["Jake L"]
 language = "en"
 src = "src"
 title = "cad-containters"
-
-[output.html]
-site-url = "/cad-containers/"
