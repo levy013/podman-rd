@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Installation - cad-containters</title>
+        <title>Reverse Proxy - cad-containters</title>
 
 
         <!-- Custom HTML head -->
@@ -12,33 +12,33 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff">
 
-        <link rel="icon" href="../favicon.svg">
-        <link rel="shortcut icon" href="../favicon.png">
-        <link rel="stylesheet" href="../css/variables.css">
-        <link rel="stylesheet" href="../css/general.css">
-        <link rel="stylesheet" href="../css/chrome.css">
-        <link rel="stylesheet" href="../css/print.css" media="print">
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
-        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
-        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="../../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
 
 
         <!-- Provide site root and default themes to javascript -->
         <script>
-            const path_to_root = "../";
+            const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc.js"></script>
+        <script src="../../toc.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -102,7 +102,7 @@
             <!-- populated by js -->
             <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
             <noscript>
-                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
             </noscript>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -137,7 +137,7 @@
                     <h1 class="menu-title">cad-containters</h1>
 
                     <div class="right-buttons">
-                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
                         </a>
 
@@ -167,19 +167,86 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="nginx"><a class="header" href="#nginx">Nginx</a></h1>
-<h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
-<p><code>sudo dnf install nginx</code></p>
-<p><code>sudo systemctl enable --now nginx</code></p>
+<h2 id="what-is-a-reverse-proxy"><a class="header" href="#what-is-a-reverse-proxy">What is a reverse proxy?</a></h2>
+<p>🔗 <a href="https://www.cloudflare.com/learning/cdn/glossary/reverse-proxy/" target="_blank">Reverse Proxy</a></p>
+<p>A reverse proxy acts as an intermediary between clients and servers. They intercept client requests and forward them to the appropriate backend service.</p>
+<h2 id="why-a-reverse-proxy"><a class="header" href="#why-a-reverse-proxy">Why a reverse proxy?</a></h2>
+<p>By default, our containerized applications will be accessible from the server's hostname on the port(s) that we choose to expose, e.g. <code>http://uit1446:8080/</code></p>
+<p>... But this is admittedly pretty obnoxious for the client to use.</p>
+<p>Assuming we've set up the required DNS on the local network, <em>(or modified our Hosts file for testing purposes)</em>, we can use Nginx to bind our apps to those addresses on the server and serve our content from an <strong>"alias"</strong>.</p>
+<hr />
+<p>A reverse proxy will allow us to specify a hostname and it's relative path(s) for the client to reach out to. Nginx can then intercept, and subsequently proxy incoming requests to the corresponding resource on the server.</p>
+<p>Here is an example using CAD.MQ.API</p>
+<ul>
+<li>We have an application running on the server exposed on <code>:8080</code></li>
+<li>Clients can natively make requests to the service on <code>http://uit1446:8080/</code></li>
+<li>With a reverse proxy, we can set a custom hostname for our URI: <code>http://cadlnx/mq/</code></li>
+</ul>
+<h2 id="setup"><a class="header" href="#setup">Setup:</a></h2>
+<blockquote>
+<p>⛔ <strong>Requirements</strong></p>
+<p>🏷️ <a href="../nginx/installation.html">Nginx: Installation</a></p>
+</blockquote>
+<h3 id="1-set-up-custom-conf-inside-of-etcnginxconfd"><a class="header" href="#1-set-up-custom-conf-inside-of-etcnginxconfd">1. Set up custom conf inside of <code>/etc/nginx/conf.d/</code></a></h3>
+<blockquote>
+<p>ℹ️ Note</p>
+<p>Instead of modifying <code>/etc/nginx/nginx.conf</code> directly, it's generally considered best practice to create a custom config file inside of <code>/conf.d</code></p>
+<p>In this example, we're writing to <code>/etc/nginx/conf.d/cad.conf</code></p>
+</blockquote>
+<h3 id="2-add-the-reverse-proxy-config"><a class="header" href="#2-add-the-reverse-proxy-config">2. Add the reverse proxy config</a></h3>
+<pre><code class="language-nginx">server { 
+        listen 80; # what port Nginx should listen on
+        server_name cadlnx; # what hostname the following location block(s) should respond to
+         
+        location /mq/ { # location block containing rules/logic for handling requests to http://cadlnx/mq/*
+                rewrite ^/mq/(.*)$ /$1 break; 
+                proxy_pass http://127.0.0.1:8080; # underlying address we're proxying traffic to 
+
+                proxy_set_header Host $host; # retains original host value e.g. cadlnx
+                proxy_set_header X-Real-IP $remote_addr; # client's real IP addr 
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; # full chain of fwd IPs
+                proxy_set_header X-Forwarded-Proto $scheme; # http or https 
+        }
+
+        location /foo/ { # e.g. some other location block for handling http://cadlnx/foo/
+                ...
+        }
+} 
+</code></pre>
+<blockquote>
+<p>ℹ️ Note</p>
+<p><em>It's important to remember that the goal here is to simply proxy traffic.</em></p>
+<pre><code class="language-nginx">rewrite ^/mq/(.*)$ /$1 break;
+</code></pre>
+<p>The idea behind this rewrite is that we need to strip <code>/mq/</code> from the URI and reappend any parameters from the capture group.</p>
+<ol>
+<li>The client requests <code>http://cadlnx/mq/scalar</code></li>
+<li>Nginx intercepts and maps the request to the corresponding resource on the server</li>
+<li>The server responds with the resource found at `http://127.0.0.1:8080/scalar</li>
+</ol>
+<p>Quick regex explanation</p>
+<ul>
+<li><code>^/mq/</code> - match only if we're at the beginning of the URI
+<ul>
+<li>✅ <code>http://cadlnx/mq</code></li>
+<li>❌ <code>http://cadlnx/foo/mq</code></li>
+</ul>
+</li>
+<li><code>(.*)</code> - wildcard for capture group</li>
+<li><code>$</code> - anchor to match end of string</li>
+<li><code>/$1</code> - replacement to append parameters from capture group to '/'</li>
+</ul>
+</blockquote>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../nginx/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../rhel/nginx/installation.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../nginx/reverse_proxy.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../rhel/nginx/logs.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -189,33 +256,17 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../nginx/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../rhel/nginx/installation.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../nginx/reverse_proxy.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../rhel/nginx/logs.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 
@@ -224,13 +275,13 @@
         </script>
 
 
-        <script src="../elasticlunr.min.js"></script>
-        <script src="../mark.min.js"></script>
-        <script src="../searcher.js"></script>
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
 
-        <script src="../clipboard.min.js"></script>
-        <script src="../highlight.js"></script>
-        <script src="../book.js"></script>
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
 
         <!-- Custom JS scripts -->
 

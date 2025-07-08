@@ -168,68 +168,197 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
-<h2 id="podman-rd"><a class="header" href="#podman-rd">Podman R&amp;D</a></h2>
-<p>https://uit1446:9090/podman</p>
-<h3 id="workflow"><a class="header" href="#workflow">Workflow</a></h3>
-<ul>
-<li>Build image for app locally and push to remote server.</li>
-<li>In the future we can try leveraging auto updates for automatic rollouts on containers running specific images.</li>
-</ul>
-<h2 id="step-1-install-podman-locally"><a class="header" href="#step-1-install-podman-locally">Step 1: Install Podman Locally</a></h2>
-<p>Podman must be installed on the host machine where the application(s) are built, as well as remotely on the server where the containers will run: https://podman.io/</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="containerize-an-application"><a class="header" href="#containerize-an-application">Containerize an Application</a></h1>
+<blockquote>
+<p>ℹ️ <strong>Note</strong></p>
+<p>Quick start example for containerizing a .NET application in Podman.</p>
+<p>In this example, we'll deploy <code>CAD.MQ.API</code> in a container on <code>uit1446</code></p>
+</blockquote>
+<blockquote>
+<p>⛔ <strong>Requirements</strong></p>
+<p>🏷️ <a href="quickstart/../podman/local_setup.html">Local Setup</a></p>
+<p>🏷️ <a href="quickstart/../podman/containerization/dockerfiles.html">Containerization: Dockerfiles</a></p>
+</blockquote>
+<h2 id="step-1-create-a-dockerfile"><a class="header" href="#step-1-create-a-dockerfile">Step 1: Create a Dockerfile</a></h2>
+<pre><code class="language-dockerfile"># Set up .NET runtime env
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+WORKDIR /app
+EXPOSE 8080
+
+# Build Project
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+ARG BUILD_CONFIGURATION=Release
+WORKDIR /src 
+COPY ["/CAD.MQ.API/CAD.MQ.API.csproj", "CAD.MQ.API/"]
+RUN dotnet restore "CAD.MQ.API/CAD.MQ.API.csproj"
+COPY . .
+WORKDIR "/src/CAD.MQ.API"
+RUN dotnet build "./CAD.MQ.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
+
+FROM build AS publish
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "./CAD.MQ.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+
+ENTRYPOINT ["dotnet", "CAD.MQ.API.dll"]
+</code></pre>
+<h2 id="step-2-push-image-to-remote-server"><a class="header" href="#step-2-push-image-to-remote-server">Step 2: Push Image to Remote Server</a></h2>
+<h3 id="1-open-terminal-and-cd-to-root-dir-eg-cad24x7"><a class="header" href="#1-open-terminal-and-cd-to-root-dir-eg-cad24x7">1. Open terminal and <strong><code>cd</code></strong> to root dir <strong><code>e.g. CAD24x7</code></strong></a></h3>
+<h3 id="2-build-image"><a class="header" href="#2-build-image">2. Build Image</a></h3>
+<pre><code class="language-bash">$ podman build -f CAD.MQ.API/Dockerfile -t cmqapi:latest .
+</code></pre>
+<blockquote>
+<p>ℹ️ <strong>Note</strong></p>
+<p><code>-f</code> path to dockerfile</p>
+<p><code>-t</code> tag name</p>
+</blockquote>
+<h3 id="3-save-image-as-tar"><a class="header" href="#3-save-image-as-tar">3. Save image as <strong><code>.tar</code></strong></a></h3>
+<pre><code class="language-bash">$ podman save -o cmqapi.tar localhost/cmqapi:latest`
+</code></pre>
+<blockquote>
+<p>ℹ️ <strong>Note</strong></p>
+<p><code>localhost</code> is automatically prepended in the previous step because we're not specifying a public registry or a namespace</p>
+<p>This is Podmans way of indicating that this is a "<em>local image</em>", and has not been pulled or pushed to a remote repository</p>
+</blockquote>
+<h3 id="4-push-tar"><a class="header" href="#4-push-tar">4. Push <strong><code>.tar</code></strong></a></h3>
+<pre><code class="language-bash">$ scp cmqapi.tar lev013@uit1446.govt.hcg.local:/home/lev013
+</code></pre>
+<blockquote>
+<p>ℹ️ <strong>Note</strong></p>
+<p>Pushing to <code>user@hostname:homedir</code></p>
+</blockquote>
+<h2 id="step-3-extract-image-on-remote-server"><a class="header" href="#step-3-extract-image-on-remote-server">Step 3: Extract image on Remote Server</a></h2>
+<h3 id="1-open-terminal-and-cd-to-dir-containing-image-tar"><a class="header" href="#1-open-terminal-and-cd-to-dir-containing-image-tar">1. Open terminal and cd to dir containing image .tar</a></h3>
+<h3 id="2-load-image-from-tar"><a class="header" href="#2-load-image-from-tar">2. Load image from <strong><code>.tar</code></strong></a></h3>
+<pre><code class="language-bash">$ podman load -i cmqapi.tar
+</code></pre>
+<h2 id="step-4-start-app-in-container"><a class="header" href="#step-4-start-app-in-container">Step 4: Start App in Container</a></h2>
+<h3 id="1-start-a-container"><a class="header" href="#1-start-a-container">1. Start a container</a></h3>
+<pre><code class="language-bash">$ podman run -d -p 8080:8080 --name cmqapi localhost/cmqapi:latest
+</code></pre>
+<blockquote>
+<p>ℹ️ <strong>Note</strong></p>
+<p><code>-d</code> run detached</p>
+<p><code>-p</code> forward port on host to port on container</p>
+<p><code>--name</code> name of container</p>
+</blockquote>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="config"><a class="header" href="#config">Config</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="dockerfiles"><a class="header" href="#dockerfiles">Dockerfiles</a></h1>
+<pre><code class="language-dockerfile"># Set up .NET runtime env
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+WORKDIR /app
+EXPOSE 8080
+
+# Build Project
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+ARG BUILD_CONFIGURATION=Release
+WORKDIR /src 
+COPY ["/CAD.MQ.API/CAD.MQ.API.csproj", "CAD.MQ.API/"]
+RUN dotnet restore "CAD.MQ.API/CAD.MQ.API.csproj"
+COPY . .
+WORKDIR "/src/CAD.MQ.API"
+RUN dotnet build "./CAD.MQ.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
+
+FROM build AS publish
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "./CAD.MQ.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+
+ENTRYPOINT ["dotnet", "CAD.MQ.API.dll"]
+</code></pre>
+<p>Super High-Level explanation of a dockerfile</p>
+<p>Dockerfiles are powerful because they leverage a concept called layered caching to efficiently build images of an application. Without caching, we would need to do things like reinstall dependencies and recompile the source code every single time we rebuild an image 🫣</p>
+<pre><code>A dockerfile is essentially just a chain of sequential commands called layers. e.g. FROM, COPY, RUN, etc.
+These layers are cached and evaluated sequentially.
+A layer's cache is invalidated if
+    the underlying command changes
+    any files it depends on changes
+    any prior layer has been invalidated, e.g. if we change the .NET runtime from aspnet:9.0 to aspnet:10.0, we would essentially need to rebuild the entire image
+.dockerignore files can help with preventing unneseccary cache invalidation due to changes in dotfiles like .git or changes in bin/ and obj/
+</code></pre>
+<p>Example:</p>
+<p>❌ Bad</p>
+<p>COPY . .
+RUN dotnet restore #runs even if we simply added a comment or removed whitespace</p>
+<p>✔️ Good</p>
+<p>COPY project.csproj .
+RUN dotnet restore #only runs if the .csproj changes</p>
+<p>COPY . .
+RUN dotnet build #only runs if the source code changes</p>
+<p>... there's some nuance here, but you get the idea</p>
+<p>📝Caching Dockerfiles</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="local-setup"><a class="header" href="#local-setup">Local Setup</a></h1>
+<h2 id="install-podman-locally"><a class="header" href="#install-podman-locally">Install Podman Locally</a></h2>
+<blockquote>
+<p>ℹ️ <strong>Note</strong></p>
+<p>Podman is installed on our RHEL servers by default, but it must also be installed locally to be able to build the images of our applications.</p>
+</blockquote>
+<p>🔗 <a href="https://github.com/containers/podman/releases/download/v5.5.2/podman-5.5.2-setup.exe" target="_blank">Install Podman CLI</a></p>
 <blockquote>
 <p>I went with the CLI version since this workflow really only requires that we build the image locally</p>
 </blockquote>
 <p>On Windows, Podman runs inside of a WSL2 container, but you can still communicate with the service via cmd or powershell. The installer should handle the setup + config of WSL if it's not already enabled on your machine.</p>
 <p><a href="https://github.com/containers/podman/blob/main/docs/tutorials/podman-for-windows.md">Podman for Windows</a></p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="config"><a class="header" href="#config">Config</a></h1>
-<h2 id="configure-the-firewalld-service-to-accept-http-requests"><a class="header" href="#configure-the-firewalld-service-to-accept-http-requests">Configure the <code>firewalld</code> service to accept http requests</a></h2>
-<p><a href="https://www.redhat.com/en/blog/firewalld-linux-firewall">RHEL firewalld Docs</a></p>
-<p>By default, <code>firewalld</code> does not allow http requests</p>
-<p><code>sudo firewall-cmd --add-service=http --permanent</code></p>
-<p><code>sudo firewall-cmd --reload</code></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="cockpit"><a class="header" href="#cockpit">Cockpit</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="config-1"><a class="header" href="#config-1">Config</a></h1>
+<h2 id="configure-firewalld-for-http"><a class="header" href="#configure-firewalld-for-http">Configure <strong><code>firewalld</code></strong> for http</a></h2>
+<p>🔗 <a href="https://www.redhat.com/en/blog/firewalld-linux-firewall">RHEL firewalld Docs</a></p>
+<p>By default, <code>firewalld</code> does not allow http requests.</p>
+<pre><code class="language-bash">sudo firewall-cmd --add-service=http --permanent`
+
+sudo firewall-cmd --reload
+</code></pre>
 <h2 id="selinux"><a class="header" href="#selinux">SELinux</a></h2>
-<p><a href="https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/using_selinux/index">RHEL SELinux Docs</a></p>
-<p>When SELinux Enforcing mode is enabled, the policy for <code>httpd_t</code> (which Nginx runs under) restricts outbound network connections by default.</p>
-<p>This means that Nginx is not allowed to make outbound requests, e.g. using <code>proxy_pass</code>:</p>
-<p><code>connect() to 127.0.0.1:8080 failed (13: Permission denied)</code></p>
-<p>Instead of setting SELinux to permissive mode, we can simply allow Nginx to make outbound connections:</p>
-<p><code>sudo setsebool -P httpd_can_network_connect on</code></p>
+<p>🔗 <a href="https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/using_selinux/index">RHEL SELinux Docs</a></p>
+<p>SELinux is enabled by default on RHEL (<em>enforcing mode</em>) and comes with a lot of default security options that should not be carelessly disabled (<em>permissive mode</em>).</p>
+<p>However, when SELinux enforcing mode is enabled, outbound network connections are restricted by default. This means that services like Nginx are not permitted to make outbound requests e.g. <code>proxy_pass</code></p>
+<blockquote>
+<p>connect() to 127.0.0.1:8080 failed (13: Permission denied)</p>
+</blockquote>
+<p>Instead of setting SELinux to permissive mode, we can simply allow services to make outbound connections using TCP:</p>
+<pre><code class="language-bash">sudo setsebool -P httpd_can_network_connect on
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="nginx"><a class="header" href="#nginx">Nginx</a></h1>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="nginx-1"><a class="header" href="#nginx-1">Nginx</a></h1>
 <h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
-<p><code>sudo dnf install nginx</code></p>
-<p><code>sudo systemctl enable --now nginx</code></p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="nginx-2"><a class="header" href="#nginx-2">Nginx</a></h1>
-<h2 id="reverse-proxy"><a class="header" href="#reverse-proxy">Reverse Proxy</a></h2>
-<p><em><a href="https://github.com/levy013/podman-research?tab=readme-ov-file#step-4-start-app-in-container">Starting an App in a Container</a></em></p>
-<p><em><a href="nginx/">Installing Nginx</a></em></p>
+<p>🔗 <a href="https://nginx.org/en/docs/index.html" target="_blank">Nginx Documentation</a></p>
+<pre><code class="language-bash">sudo dnf install nginx
+
+sudo systemctl enable --now nginx
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="nginx-1"><a class="header" href="#nginx-1">Nginx</a></h1>
 <h2 id="what-is-a-reverse-proxy"><a class="header" href="#what-is-a-reverse-proxy">What is a reverse proxy?</a></h2>
-<p><em>A reverse proxy acts as an intermediary between clients and servers. They intercept client requests and forward them to the appropriate backend service.</em>
-https://www.cloudflare.com/learning/cdn/glossary/reverse-proxy/</p>
-<h2 id="use-case"><a class="header" href="#use-case">Use Case:</a></h2>
-<p>By default, our applications are accessible from the server's hostname on the ports that we choose to expose when running the containers.
-e.g. we expose port 8080 on uit1446 to serve CAD.MQ.API =&gt; http://uit1446:8080/api/list</p>
-<p>But this is admittedly pretty obnoxious for the client to use effectively.</p>
-<p>Assuming we've set up some DNS entries on the local network (or modified our Hosts file), we can use Nginx to bind our apps to those addresses on the server and serve our content from an "alias".</p>
-<p>A reverse proxy will allow us to specify both a hostname and it's related path(s) for the client to reach out to. This maintains a consistent "shape" for the request to take on that Nginx can subsequently match against and proxy to the corresponding resource on the server.</p>
+<p>🔗 <a href="https://www.cloudflare.com/learning/cdn/glossary/reverse-proxy/" target="_blank">Reverse Proxy</a></p>
+<p>A reverse proxy acts as an intermediary between clients and servers. They intercept client requests and forward them to the appropriate backend service.</p>
+<h2 id="why-a-reverse-proxy"><a class="header" href="#why-a-reverse-proxy">Why a reverse proxy?</a></h2>
+<p>By default, our containerized applications will be accessible from the server's hostname on the port(s) that we choose to expose, e.g. <code>http://uit1446:8080/</code></p>
+<p>... But this is admittedly pretty obnoxious for the client to use.</p>
+<p>Assuming we've set up the required DNS on the local network, <em>(or modified our Hosts file for testing purposes)</em>, we can use Nginx to bind our apps to those addresses on the server and serve our content from an <strong>"alias"</strong>.</p>
+<hr />
+<p>A reverse proxy will allow us to specify a hostname and it's relative path(s) for the client to reach out to. Nginx can then intercept, and subsequently proxy incoming requests to the corresponding resource on the server.</p>
 <p>Here is an example using CAD.MQ.API</p>
 <ul>
-<li>Our application is running on the server exposed on http://localhost:8080/</li>
-<li>Clients can natively make requests to the service on http://uit1446:8080/</li>
-<li>With a reverse proxy we can offer the client a prettier URI, such as http://cadlnx/mq/</li>
+<li>We have an application running on the server exposed on <code>:8080</code></li>
+<li>Clients can natively make requests to the service on <code>http://uit1446:8080/</code></li>
+<li>With a reverse proxy, we can set a custom hostname for our URI: <code>http://cadlnx/mq/</code></li>
 </ul>
 <h2 id="setup"><a class="header" href="#setup">Setup:</a></h2>
-<ol>
-<li>Set up custom conf inside of <code>/etc/nginx/conf.d/</code></li>
-</ol>
 <blockquote>
-<p>Instead of modifying <code>/etc/nginx/nginx.conf</code> directly, it's generally considered best practice to create a custom conf inside of <code>/conf.d</code></p>
+<p>⛔ <strong>Requirements</strong></p>
+<p>🏷️ <a href="rhel/nginx/../nginx/installation.html">Nginx: Installation</a></p>
+</blockquote>
+<h3 id="1-set-up-custom-conf-inside-of-etcnginxconfd"><a class="header" href="#1-set-up-custom-conf-inside-of-etcnginxconfd">1. Set up custom conf inside of <code>/etc/nginx/conf.d/</code></a></h3>
+<blockquote>
+<p>ℹ️ Note</p>
+<p>Instead of modifying <code>/etc/nginx/nginx.conf</code> directly, it's generally considered best practice to create a custom config file inside of <code>/conf.d</code></p>
 <p>In this example, we're writing to <code>/etc/nginx/conf.d/cad.conf</code></p>
 </blockquote>
-<ol start="2">
-<li>Add the reverse proxy config</li>
-</ol>
+<h3 id="2-add-the-reverse-proxy-config"><a class="header" href="#2-add-the-reverse-proxy-config">2. Add the reverse proxy config</a></h3>
 <pre><code class="language-nginx">server { 
         listen 80; # what port Nginx should listen on
         server_name cadlnx; # what hostname the following location block(s) should respond to
@@ -249,30 +378,44 @@ e.g. we expose port 8080 on uit1446 to serve CAD.MQ.API =&gt; http://uit1446:808
         }
 } 
 </code></pre>
-<p>Understanding <code>rewrite ^/mq/(.*)$ /$1 break;</code></p>
 <blockquote>
-<p><em>It's important to remember that we're simply proxying traffic here. The idea behind this rewrite is that we need to strip /mq/ from the URI and reappend any parameters from the capture group.</em></p>
-<p>Again, we're essentially just creating a pretty URL for the client to leverage.</p>
+<p>ℹ️ Note</p>
+<p><em>It's important to remember that the goal here is to simply proxy traffic.</em></p>
+<pre><code class="language-nginx">rewrite ^/mq/(.*)$ /$1 break;
+</code></pre>
+<p>The idea behind this rewrite is that we need to strip <code>/mq/</code> from the URI and reappend any parameters from the capture group.</p>
+<ol>
+<li>The client requests <code>http://cadlnx/mq/scalar</code></li>
+<li>Nginx intercepts and maps the request to the corresponding resource on the server</li>
+<li>The server responds with the resource found at `http://127.0.0.1:8080/scalar</li>
+</ol>
+<p>Quick regex explanation</p>
 <ul>
-<li>The client requests http://cadlnx/mq/scalar</li>
-<li>Nginx intercepts and massages the request</li>
-<li>The server responds with the resource found at http://127.0.0.1:8080/scalar</li>
+<li><code>^/mq/</code> - match only if we're at the beginning of the URI
+<ul>
+<li>✅ <code>http://cadlnx/mq</code></li>
+<li>❌ <code>http://cadlnx/foo/mq</code></li>
 </ul>
-<p>The regex is relatively straightforward as well</p>
-<ul>
-<li>^/mq/ : match only if we're at the beginning of the URI, so http://cadlnx/mq will match but http://cadlnx/foo/mq will not</li>
-<li>(.*) : wildcard for capture group</li>
-<li>$ : anchor to match end of string</li>
-<li>/$1 : replacement to append parameters from capture group to '/'</li>
+</li>
+<li><code>(.*)</code> - wildcard for capture group</li>
+<li><code>$</code> - anchor to match end of string</li>
+<li><code>/$1</code> - replacement to append parameters from capture group to '/'</li>
 </ul>
 </blockquote>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="nginx-3"><a class="header" href="#nginx-3">Nginx</a></h1>
-<h2 id="logs"><a class="header" href="#logs">Logs</a></h2>
-<h3 id="error-log"><a class="header" href="#error-log">Error Log:</a></h3>
-<p><code>/var/log/nginx/error.log</code></p>
-<h3 id="access-log"><a class="header" href="#access-log">Access Log:</a></h3>
-<p><code>/var/log/nginx/access.log</code></p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="logs-1"><a class="header" href="#logs-1">Logs</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="nginx-2"><a class="header" href="#nginx-2">Nginx</a></h1>
+<h2 id="error-log"><a class="header" href="#error-log">Error Log:</a></h2>
+<pre><code class="language-bash">$ sudo less /var/log/nginx/error.log
+</code></pre>
+<h2 id="access-log"><a class="header" href="#access-log">Access Log:</a></h2>
+<pre><code class="language-bash">$ sudo less /var/log/nginx/access.log
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="sysadmin"><a class="header" href="#sysadmin">Sysadmin</a></h1>
+<blockquote>
+<p>When we spin up new servers, there are certain configurations that the sysadmins can set up by default.</p>
+</blockquote>
+<ol>
+<li><a href="sysadmin/../rhel/config.html#configure-firewalld-for-http">Add HTTP to firewalld</a></li>
+</ol>
 
                     </main>
 
@@ -291,22 +434,6 @@ e.g. we expose port 8080 on uit1446 to serve CAD.MQ.API =&gt; http://uit1446:808
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 
