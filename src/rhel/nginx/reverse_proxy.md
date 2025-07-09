@@ -3,7 +3,7 @@
 ## What is a reverse proxy?
 🔗 <a href="https://www.cloudflare.com/learning/cdn/glossary/reverse-proxy/" target="_blank">Reverse Proxy</a>
 
-A reverse proxy acts as an intermediary between clients and servers. They intercept client requests and forward them to the appropriate backend service.
+*A reverse proxy acts as an intermediary between clients and servers. They intercept client requests and forward them to the appropriate backend service.*
 
 ## Why a reverse proxy? 
 By default, our containerized applications will be accessible from the server's hostname on the port(s) that we choose to expose, e.g. `http://uit1446:8080/`
