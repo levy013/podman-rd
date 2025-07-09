@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Config - cad-containters</title>
+        <title>Push To Remote Server - cad-containters</title>
 
 
         <!-- Custom HTML head -->
@@ -166,18 +166,54 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="config"><a class="header" href="#config">Config</a></h1>
-<h2 id="-"><a class="header" href="#-">... 🦗</a></h2>
+                        <h1 id="push-image-to-remote-server"><a class="header" href="#push-image-to-remote-server">Push Image to Remote Server</a></h1>
+<blockquote>
+<p>⚠️ <strong>Warning</strong></p>
+<p>This may become a script at some point</p>
+</blockquote>
+<h2 id="1-open-terminal-and-cd-to-root-dir-eg-cad24x7"><a class="header" href="#1-open-terminal-and-cd-to-root-dir-eg-cad24x7">1. Open terminal and <strong><code>cd</code></strong> to root dir <strong><code>e.g. CAD24x7</code></strong></a></h2>
+<pre><code class="language-bash">$ pwd
+/c/git/CAD24x7
+
+$ ls
+CAD CAD.API CAD.BL ... etc.
+</code></pre>
+<h2 id="2-build-image"><a class="header" href="#2-build-image">2. Build Image</a></h2>
+<pre><code class="language-bash">$ podman build -f CAD.MQ.API/Dockerfile -t cadmq-api:latest .
+</code></pre>
+<blockquote>
+<p>ℹ️ <strong>Note</strong></p>
+<p><code>-f</code> path to dockerfile</p>
+<p><code>-t</code> tag name</p>
+</blockquote>
+<h2 id="3-save-image-as-tar"><a class="header" href="#3-save-image-as-tar">3. Save image as <strong><code>.tar</code></strong></a></h2>
+<pre><code class="language-bash">$ podman save -o cadmq-api.tar localhost/cadmq-api:latest`
+</code></pre>
+<blockquote>
+<p>ℹ️ <strong>Note</strong></p>
+<p><code>localhost</code> is automatically prepended in the previous step because we're not specifying a public registry or a namespace</p>
+<p>This is Podmans way of indicating that this is a "<em>local image</em>", and has not been pulled or pushed to a remote repository</p>
+</blockquote>
+<h2 id="4-push-tar-to-remote-server"><a class="header" href="#4-push-tar-to-remote-server">4. Push <strong><code>.tar</code></strong> to Remote Server</a></h2>
+<pre><code class="language-bash">$ scp cadmq-api.tar cad@uit1446.govt.hcg.local:/home/cad
+</code></pre>
+<blockquote>
+<p>ℹ️ <strong>Note</strong></p>
+<p>Pushing to <code>user@hostname:homedir</code></p>
+</blockquote>
+<h2 id="5-clean-up-tar"><a class="header" href="#5-clean-up-tar">5. Clean up <strong><code>.tar</code></strong></a></h2>
+<pre><code class="language-bash">$ rm cadmq-api.tar
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../localenv/push_to_remote_server.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../localenv/config.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../podman/autostart.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../podman/config.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -187,11 +223,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../localenv/push_to_remote_server.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../localenv/config.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../podman/autostart.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../podman/config.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

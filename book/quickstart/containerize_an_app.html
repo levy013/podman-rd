@@ -174,59 +174,15 @@
 </blockquote>
 <blockquote>
 <p>⛔ <strong>Requirements</strong></p>
-<p>🏷️ <a href="../podman/local_setup.html">Local Setup</a></p>
-<p>🏷️ <a href="../podman/containerization/dockerfiles.html">Containerization: Dockerfiles</a></p>
+<p>🏷️ <a href="../localenv/config.html#install-podman-locally"><strong>Local Environment:</strong>  Config / Install Podman Locally</a></p>
 </blockquote>
 <h2 id="step-1-create-a-dockerfile"><a class="header" href="#step-1-create-a-dockerfile">Step 1: Create a Dockerfile</a></h2>
-<pre><code class="language-dockerfile"># Set up .NET runtime env
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
-WORKDIR /app
-EXPOSE 8080
-
-# Build Project
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
-ARG BUILD_CONFIGURATION=Release
-WORKDIR /src 
-COPY ["/CAD.MQ.API/CAD.MQ.API.csproj", "CAD.MQ.API/"]
-RUN dotnet restore "CAD.MQ.API/CAD.MQ.API.csproj"
-COPY . .
-WORKDIR "/src/CAD.MQ.API"
-RUN dotnet build "./CAD.MQ.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
-
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./CAD.MQ.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
-
-FROM base AS final
-WORKDIR /app
-COPY --from=publish /app/publish .
-
-ENTRYPOINT ["dotnet", "CAD.MQ.API.dll"]
-</code></pre>
+<blockquote>
+<p>🏷️ <a href="../podman/dockerfiles.html"><strong>Containerization:</strong> Dockerfiles</a></p>
+</blockquote>
 <h2 id="step-2-push-image-to-remote-server"><a class="header" href="#step-2-push-image-to-remote-server">Step 2: Push Image to Remote Server</a></h2>
-<h3 id="1-open-terminal-and-cd-to-root-dir-eg-cad24x7"><a class="header" href="#1-open-terminal-and-cd-to-root-dir-eg-cad24x7">1. Open terminal and <strong><code>cd</code></strong> to root dir <strong><code>e.g. CAD24x7</code></strong></a></h3>
-<h3 id="2-build-image"><a class="header" href="#2-build-image">2. Build Image</a></h3>
-<pre><code class="language-bash">$ podman build -f CAD.MQ.API/Dockerfile -t cmqapi:latest .
-</code></pre>
 <blockquote>
-<p>ℹ️ <strong>Note</strong></p>
-<p><code>-f</code> path to dockerfile</p>
-<p><code>-t</code> tag name</p>
-</blockquote>
-<h3 id="3-save-image-as-tar"><a class="header" href="#3-save-image-as-tar">3. Save image as <strong><code>.tar</code></strong></a></h3>
-<pre><code class="language-bash">$ podman save -o cmqapi.tar localhost/cmqapi:latest`
-</code></pre>
-<blockquote>
-<p>ℹ️ <strong>Note</strong></p>
-<p><code>localhost</code> is automatically prepended in the previous step because we're not specifying a public registry or a namespace</p>
-<p>This is Podmans way of indicating that this is a "<em>local image</em>", and has not been pulled or pushed to a remote repository</p>
-</blockquote>
-<h3 id="4-push-tar"><a class="header" href="#4-push-tar">4. Push <strong><code>.tar</code></strong></a></h3>
-<pre><code class="language-bash">$ scp cmqapi.tar lev013@uit1446.govt.hcg.local:/home/lev013
-</code></pre>
-<blockquote>
-<p>ℹ️ <strong>Note</strong></p>
-<p>Pushing to <code>user@hostname:homedir</code></p>
+<p>🏷️ <a href="../localenv/push_to_remote_server.html"><strong>Local Environment:</strong> Push To Remote Server</a></p>
 </blockquote>
 <h2 id="step-3-extract-image-on-remote-server"><a class="header" href="#step-3-extract-image-on-remote-server">Step 3: Extract image on Remote Server</a></h2>
 <h3 id="1-open-terminal-and-cd-to-dir-containing-image-tar"><a class="header" href="#1-open-terminal-and-cd-to-dir-containing-image-tar">1. Open terminal and cd to dir containing image .tar</a></h3>

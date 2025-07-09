@@ -188,8 +188,18 @@ Install Podman GUI and work</p>
 </ul>
 </li>
 <li>
-<p><input disabled="" type="checkbox"/>
+<p><input disabled="" type="checkbox" checked=""/>
 Look into Container auto starting after server patching/restarting</p>
+<ul>
+<li>Working through a couple solutions, but successfully implemented with systemd unit file and by deploying container directly as system (root) user</li>
+</ul>
+</li>
+<li>
+<p><input disabled="" type="checkbox" checked=""/>
+Generic CAD user to manage apps</p>
+<ul>
+<li>Running apps under your own user doesn't really make sense... just created 'CAD' user to deploy from for now</li>
+</ul>
 </li>
 <li>
 <p><input disabled="" type="checkbox"/>
@@ -197,11 +207,11 @@ Include a nuget.config file to identify the private stream via URL and credentia
 </li>
 <li>
 <p><input disabled="" type="checkbox"/>
-Generalized CAD user to manage apps</p>
+Condense containerization cmds into PS script (make sure script removes .tar after we scp to server)</p>
 </li>
 <li>
 <p><input disabled="" type="checkbox"/>
-Condense containerization cmds into PS script (make sure script removes .tar after we scp to server)</p>
+Should we consider setting up a private registry? That way everyone can push/pull from here. We can host this on any server.</p>
 </li>
 <li>
 <p><input disabled="" type="checkbox"/>

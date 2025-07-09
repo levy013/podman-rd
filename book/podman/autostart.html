@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Config - cad-containters</title>
+        <title>Autostart - cad-containters</title>
 
 
         <!-- Custom HTML head -->
@@ -166,18 +166,80 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="config"><a class="header" href="#config">Config</a></h1>
-<h2 id="-"><a class="header" href="#-">... 🦗</a></h2>
+                        <h1 id="autostart"><a class="header" href="#autostart">Autostart</a></h1>
+<blockquote>
+<p>ℹ️ <strong>Note</strong></p>
+<p>The goal here is to ensure that if our servers are restarted (<em>gracefully or not</em>) that our containers will start back up without human intervention.</p>
+<p>There are a few different ways to achieve this.</p>
+</blockquote>
+<h2 id="method-1-running-container-under-systemroot"><a class="header" href="#method-1-running-container-under-systemroot">Method 1: Running container under system(root)</a></h2>
+<blockquote>
+<p>ℹ️ <strong>Note</strong></p>
+<p>This is not advised. The nice thing about podman is that it allows us to run rootless containers in the first place...</p>
+</blockquote>
+<blockquote>
+<p>⛔ <strong>Requirements</strong></p>
+<p>🏷️ <a href="../localenv/push_to_remote_server.html">Push Image to Remote Server</a></p>
+</blockquote>
+<h3 id="1-share-image-with-systemroot-user"><a class="header" href="#1-share-image-with-systemroot-user">1. Share image with system/root user</a></h3>
+<pre><code class="language-bash">$ podman image scp USERNAME@localhost::$IMAGE root@localhost::
+</code></pre>
+<h3 id="2-navigate-to-containers-tab-and-run-container-with-these-mods"><a class="header" href="#2-navigate-to-containers-tab-and-run-container-with-these-mods">2. Navigate to containers tab and run container with these mods:</a></h3>
+<ul>
+<li>owner = system</li>
+<li>restart policy = always</li>
+<li>integration / port mapping = host: 8080 container: 8080 (just match dockerfile)</li>
+</ul>
+<h2 id="method-2-setting-up-container-to-run-as-a-systemd-service"><a class="header" href="#method-2-setting-up-container-to-run-as-a-systemd-service">Method 2: Setting up container to run as a systemd service</a></h2>
+<blockquote>
+<p>ℹ️ <strong>Note</strong></p>
+<p>Following this guide from RHEL:</p>
+<p>🔗 <a href="https://www.redhat.com/en/blog/container-systemd-persist-reboot" target="_blank">Configure a container to start automatically as a systemd service</a></p>
+<p>This method is technically deprecated, though many users still prefer this approach - it's now recommended to use Quadlets when interacting with systemd</p>
+</blockquote>
+<h3 id="1-mkdir-for-systemd-file"><a class="header" href="#1-mkdir-for-systemd-file">1. Mkdir for systemd file</a></h3>
+<blockquote>
+<p>⚠️<strong>Warning</strong></p>
+<p>This only needs to be done once. If this is a new server (assuming it hasn't been done)</p>
+</blockquote>
+<pre><code class="language-bash">$ mkdir -p ~/.config/systemd/user/
+</code></pre>
+<h3 id="2-start-a-container"><a class="header" href="#2-start-a-container">2. Start a container</a></h3>
+<p>🏷️ <a href="../podman/running_containers.html">Running Containers</a></p>
+<h3 id="3-generate-systemd-files-for-the-running-container"><a class="header" href="#3-generate-systemd-files-for-the-running-container">3. Generate systemd files for the running container</a></h3>
+<pre><code class="language-bash">$ podman generate systemd --new --files --name myapp
+</code></pre>
+<h3 id="4-stop-the-container"><a class="header" href="#4-stop-the-container">4. Stop the container</a></h3>
+<pre><code class="language-bash">$ podman stop myapp &amp;&amp; podman rm -a &amp;&amp; podman volume prune myapp
+</code></pre>
+<h3 id="5-copy-unit-file-into-dir"><a class="header" href="#5-copy-unit-file-into-dir">5. Copy unit file into dir</a></h3>
+<pre><code class="language-bash">$ cp -Z container-myapp.service ~/.config/systemd/user/
+</code></pre>
+<h3 id="6-reload-user-level-systemctl-daemon"><a class="header" href="#6-reload-user-level-systemctl-daemon">6. Reload user level systemctl daemon</a></h3>
+<pre><code class="language-bash">$ systemctl --user daemon-reload
+</code></pre>
+<p>We can start container using systemd now instead</p>
+<pre><code class="language-bash">$ systemctl --user start container-myapp.service
+</code></pre>
+<h3 id="7-add-to-startstop-of-system"><a class="header" href="#7-add-to-startstop-of-system">7. Add to start/stop of system</a></h3>
+<h4 id="add"><a class="header" href="#add">Add</a></h4>
+<pre><code class="language-bash">$ systemctl --user enable container-cadmq-api.service
+</code></pre>
+<h4 id="remove"><a class="header" href="#remove">Remove</a></h4>
+<pre><code class="language-bash">$ systemctl --user stop container-cadmq-api.service
+</code></pre>
+<h2 id="method-3-quadlets"><a class="header" href="#method-3-quadlets">Method 3: Quadlets</a></h2>
+<h3 id="-"><a class="header" href="#-">... 🦗</a></h3>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../localenv/push_to_remote_server.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../podman/config.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../podman/autostart.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../podman/dockerfiles.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -187,11 +249,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../localenv/push_to_remote_server.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../podman/config.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../podman/autostart.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../podman/dockerfiles.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Config - cad-containters</title>
+        <title>Dockerfiles - cad-containters</title>
 
 
         <!-- Custom HTML head -->
@@ -166,18 +166,63 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="config"><a class="header" href="#config">Config</a></h1>
-<h2 id="-"><a class="header" href="#-">... 🦗</a></h2>
+                        <h1 id="dockerfiles"><a class="header" href="#dockerfiles">Dockerfiles</a></h1>
+<pre><code class="language-dockerfile"># Set up .NET runtime env
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+WORKDIR /app
+EXPOSE 8080
+
+# Build Project
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+ARG BUILD_CONFIGURATION=Release
+WORKDIR /src 
+COPY ["/CAD.MQ.API/CAD.MQ.API.csproj", "CAD.MQ.API/"]
+RUN dotnet restore "CAD.MQ.API/CAD.MQ.API.csproj"
+COPY . .
+WORKDIR "/src/CAD.MQ.API"
+RUN dotnet build "./CAD.MQ.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
+
+FROM build AS publish
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "./CAD.MQ.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+
+ENTRYPOINT ["dotnet", "CAD.MQ.API.dll"]
+</code></pre>
+<p>Super High-Level explanation of a dockerfile</p>
+<p>Dockerfiles are powerful because they leverage a concept called layered caching to efficiently build images of an application. Without caching, we would need to do things like reinstall dependencies and recompile the source code every single time we rebuild an image 🫣</p>
+<pre><code>A dockerfile is essentially just a chain of sequential commands called layers. e.g. FROM, COPY, RUN, etc.
+These layers are cached and evaluated sequentially.
+A layer's cache is invalidated if
+    the underlying command changes
+    any files it depends on changes
+    any prior layer has been invalidated, e.g. if we change the .NET runtime from aspnet:9.0 to aspnet:10.0, we would essentially need to rebuild the entire image
+.dockerignore files can help with preventing unneseccary cache invalidation due to changes in dotfiles like .git or changes in bin/ and obj/
+</code></pre>
+<p>Example:</p>
+<p>❌ Bad</p>
+<p>COPY . .
+RUN dotnet restore #runs even if we simply added a comment or removed whitespace</p>
+<p>✔️ Good</p>
+<p>COPY project.csproj .
+RUN dotnet restore #only runs if the .csproj changes</p>
+<p>COPY . .
+RUN dotnet build #only runs if the source code changes</p>
+<p>... there's some nuance here, but you get the idea</p>
+<p>📝Caching Dockerfiles</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../localenv/push_to_remote_server.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../podman/autostart.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../podman/autostart.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../podman/running_containers.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -187,11 +232,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../localenv/push_to_remote_server.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../podman/autostart.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../podman/autostart.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../podman/running_containers.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

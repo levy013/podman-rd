@@ -178,8 +178,110 @@
 </blockquote>
 <p>🔗 <a href="https://github.com/containers/podman/releases/download/v5.5.2/podman-5.5.2-setup.exe" target="_blank">Install Podman CLI</a></p>
 <p>🔗 <a href="https://github.com/containers/podman/blob/main/docs/tutorials/podman-for-windows.md" target="_blank">Docs: Podman for Windows</a></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="push-image-to-remote-server"><a class="header" href="#push-image-to-remote-server">Push Image to Remote Server</a></h1>
+<blockquote>
+<p>⚠️ <strong>Warning</strong></p>
+<p>This may become a script at some point</p>
+</blockquote>
+<h2 id="1-open-terminal-and-cd-to-root-dir-eg-cad24x7"><a class="header" href="#1-open-terminal-and-cd-to-root-dir-eg-cad24x7">1. Open terminal and <strong><code>cd</code></strong> to root dir <strong><code>e.g. CAD24x7</code></strong></a></h2>
+<pre><code class="language-bash">$ pwd
+/c/git/CAD24x7
+
+$ ls
+CAD CAD.API CAD.BL ... etc.
+</code></pre>
+<h2 id="2-build-image"><a class="header" href="#2-build-image">2. Build Image</a></h2>
+<pre><code class="language-bash">$ podman build -f CAD.MQ.API/Dockerfile -t cadmq-api:latest .
+</code></pre>
+<blockquote>
+<p>ℹ️ <strong>Note</strong></p>
+<p><code>-f</code> path to dockerfile</p>
+<p><code>-t</code> tag name</p>
+</blockquote>
+<h2 id="3-save-image-as-tar"><a class="header" href="#3-save-image-as-tar">3. Save image as <strong><code>.tar</code></strong></a></h2>
+<pre><code class="language-bash">$ podman save -o cadmq-api.tar localhost/cadmq-api:latest`
+</code></pre>
+<blockquote>
+<p>ℹ️ <strong>Note</strong></p>
+<p><code>localhost</code> is automatically prepended in the previous step because we're not specifying a public registry or a namespace</p>
+<p>This is Podmans way of indicating that this is a "<em>local image</em>", and has not been pulled or pushed to a remote repository</p>
+</blockquote>
+<h2 id="4-push-tar-to-remote-server"><a class="header" href="#4-push-tar-to-remote-server">4. Push <strong><code>.tar</code></strong> to Remote Server</a></h2>
+<pre><code class="language-bash">$ scp cadmq-api.tar cad@uit1446.govt.hcg.local:/home/cad
+</code></pre>
+<blockquote>
+<p>ℹ️ <strong>Note</strong></p>
+<p>Pushing to <code>user@hostname:homedir</code></p>
+</blockquote>
+<h2 id="5-clean-up-tar"><a class="header" href="#5-clean-up-tar">5. Clean up <strong><code>.tar</code></strong></a></h2>
+<pre><code class="language-bash">$ rm cadmq-api.tar
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="config-1"><a class="header" href="#config-1">Config</a></h1>
 <h2 id="-"><a class="header" href="#-">... 🦗</a></h2>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="autostart"><a class="header" href="#autostart">Autostart</a></h1>
+<blockquote>
+<p>ℹ️ <strong>Note</strong></p>
+<p>The goal here is to ensure that if our servers are restarted (<em>gracefully or not</em>) that our containers will start back up without human intervention.</p>
+<p>There are a few different ways to achieve this.</p>
+</blockquote>
+<h2 id="method-1-running-container-under-systemroot"><a class="header" href="#method-1-running-container-under-systemroot">Method 1: Running container under system(root)</a></h2>
+<blockquote>
+<p>ℹ️ <strong>Note</strong></p>
+<p>This is not advised. The nice thing about podman is that it allows us to run rootless containers in the first place...</p>
+</blockquote>
+<blockquote>
+<p>⛔ <strong>Requirements</strong></p>
+<p>🏷️ <a href="podman/../localenv/push_to_remote_server.html">Push Image to Remote Server</a></p>
+</blockquote>
+<h3 id="1-share-image-with-systemroot-user"><a class="header" href="#1-share-image-with-systemroot-user">1. Share image with system/root user</a></h3>
+<pre><code class="language-bash">$ podman image scp USERNAME@localhost::$IMAGE root@localhost::
+</code></pre>
+<h3 id="2-navigate-to-containers-tab-and-run-container-with-these-mods"><a class="header" href="#2-navigate-to-containers-tab-and-run-container-with-these-mods">2. Navigate to containers tab and run container with these mods:</a></h3>
+<ul>
+<li>owner = system</li>
+<li>restart policy = always</li>
+<li>integration / port mapping = host: 8080 container: 8080 (just match dockerfile)</li>
+</ul>
+<h2 id="method-2-setting-up-container-to-run-as-a-systemd-service"><a class="header" href="#method-2-setting-up-container-to-run-as-a-systemd-service">Method 2: Setting up container to run as a systemd service</a></h2>
+<blockquote>
+<p>ℹ️ <strong>Note</strong></p>
+<p>Following this guide from RHEL:</p>
+<p>🔗 <a href="https://www.redhat.com/en/blog/container-systemd-persist-reboot" target="_blank">Configure a container to start automatically as a systemd service</a></p>
+<p>This method is technically deprecated, though many users still prefer this approach - it's now recommended to use Quadlets when interacting with systemd</p>
+</blockquote>
+<h3 id="1-mkdir-for-systemd-file"><a class="header" href="#1-mkdir-for-systemd-file">1. Mkdir for systemd file</a></h3>
+<blockquote>
+<p>⚠️<strong>Warning</strong></p>
+<p>This only needs to be done once. If this is a new server (assuming it hasn't been done)</p>
+</blockquote>
+<pre><code class="language-bash">$ mkdir -p ~/.config/systemd/user/
+</code></pre>
+<h3 id="2-start-a-container"><a class="header" href="#2-start-a-container">2. Start a container</a></h3>
+<p>🏷️ <a href="podman/../podman/running_containers.html">Running Containers</a></p>
+<h3 id="3-generate-systemd-files-for-the-running-container"><a class="header" href="#3-generate-systemd-files-for-the-running-container">3. Generate systemd files for the running container</a></h3>
+<pre><code class="language-bash">$ podman generate systemd --new --files --name myapp
+</code></pre>
+<h3 id="4-stop-the-container"><a class="header" href="#4-stop-the-container">4. Stop the container</a></h3>
+<pre><code class="language-bash">$ podman stop myapp &amp;&amp; podman rm -a &amp;&amp; podman volume prune myapp
+</code></pre>
+<h3 id="5-copy-unit-file-into-dir"><a class="header" href="#5-copy-unit-file-into-dir">5. Copy unit file into dir</a></h3>
+<pre><code class="language-bash">$ cp -Z container-myapp.service ~/.config/systemd/user/
+</code></pre>
+<h3 id="6-reload-user-level-systemctl-daemon"><a class="header" href="#6-reload-user-level-systemctl-daemon">6. Reload user level systemctl daemon</a></h3>
+<pre><code class="language-bash">$ systemctl --user daemon-reload
+</code></pre>
+<p>We can start container using systemd now instead</p>
+<pre><code class="language-bash">$ systemctl --user start container-myapp.service
+</code></pre>
+<h3 id="7-add-to-startstop-of-system"><a class="header" href="#7-add-to-startstop-of-system">7. Add to start/stop of system</a></h3>
+<h4 id="add"><a class="header" href="#add">Add</a></h4>
+<pre><code class="language-bash">$ systemctl --user enable container-cadmq-api.service
+</code></pre>
+<h4 id="remove"><a class="header" href="#remove">Remove</a></h4>
+<pre><code class="language-bash">$ systemctl --user stop container-cadmq-api.service
+</code></pre>
+<h2 id="method-3-quadlets"><a class="header" href="#method-3-quadlets">Method 3: Quadlets</a></h2>
+<h3 id="--1"><a class="header" href="#--1">... 🦗</a></h3>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="dockerfiles"><a class="header" href="#dockerfiles">Dockerfiles</a></h1>
 <pre><code class="language-dockerfile"># Set up .NET runtime env
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
@@ -227,13 +329,14 @@ RUN dotnet restore #only runs if the .csproj changes</p>
 RUN dotnet build #only runs if the source code changes</p>
 <p>... there's some nuance here, but you get the idea</p>
 <p>📝Caching Dockerfiles</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="running-containers"><a class="header" href="#running-containers">Running Containers</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="config-2"><a class="header" href="#config-2">Config</a></h1>
 <h2 id="configure-firewalld-for-http"><a class="header" href="#configure-firewalld-for-http">Configure <strong><code>firewalld</code></strong> for http</a></h2>
 <p>🔗 <a href="https://www.redhat.com/en/blog/firewalld-linux-firewall">RHEL firewalld Docs</a></p>
 <p>By default, <code>firewalld</code> does not allow http requests.</p>
-<pre><code class="language-bash">sudo firewall-cmd --add-service=http --permanent`
+<pre><code class="language-bash">$ sudo firewall-cmd --add-service=http --permanent
 
-sudo firewall-cmd --reload
+$ sudo firewall-cmd --reload
 </code></pre>
 <h2 id="selinux"><a class="header" href="#selinux">SELinux</a></h2>
 <p>🔗 <a href="https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/using_selinux/index">RHEL SELinux Docs</a></p>
@@ -243,10 +346,10 @@ sudo firewall-cmd --reload
 <p>connect() to 127.0.0.1:8080 failed (13: Permission denied)</p>
 </blockquote>
 <p>Instead of setting SELinux to permissive mode, we can simply allow services to make outbound connections using TCP:</p>
-<pre><code class="language-bash">sudo setsebool -P httpd_can_network_connect on
+<pre><code class="language-bash">$ sudo setsebool -P httpd_can_network_connect on
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="cockpit"><a class="header" href="#cockpit">Cockpit</a></h1>
-<h2 id="--1"><a class="header" href="#--1">... 🦗</a></h2>
+<h2 id="--2"><a class="header" href="#--2">... 🦗</a></h2>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="nginx"><a class="header" href="#nginx">Nginx</a></h1>
 <h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
 <p>🔗 <a href="https://nginx.org/en/docs/index.html" target="_blank">Nginx Documentation</a></p>
@@ -340,59 +443,15 @@ sudo systemctl enable --now nginx
 </blockquote>
 <blockquote>
 <p>⛔ <strong>Requirements</strong></p>
-<p>🏷️ <a href="quickstart/../podman/local_setup.html">Local Setup</a></p>
-<p>🏷️ <a href="quickstart/../podman/containerization/dockerfiles.html">Containerization: Dockerfiles</a></p>
+<p>🏷️ <a href="quickstart/../localenv/config.html#install-podman-locally"><strong>Local Environment:</strong>  Config / Install Podman Locally</a></p>
 </blockquote>
 <h2 id="step-1-create-a-dockerfile"><a class="header" href="#step-1-create-a-dockerfile">Step 1: Create a Dockerfile</a></h2>
-<pre><code class="language-dockerfile"># Set up .NET runtime env
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
-WORKDIR /app
-EXPOSE 8080
-
-# Build Project
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
-ARG BUILD_CONFIGURATION=Release
-WORKDIR /src 
-COPY ["/CAD.MQ.API/CAD.MQ.API.csproj", "CAD.MQ.API/"]
-RUN dotnet restore "CAD.MQ.API/CAD.MQ.API.csproj"
-COPY . .
-WORKDIR "/src/CAD.MQ.API"
-RUN dotnet build "./CAD.MQ.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
-
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./CAD.MQ.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
-
-FROM base AS final
-WORKDIR /app
-COPY --from=publish /app/publish .
-
-ENTRYPOINT ["dotnet", "CAD.MQ.API.dll"]
-</code></pre>
+<blockquote>
+<p>🏷️ <a href="quickstart/../podman/dockerfiles.html"><strong>Containerization:</strong> Dockerfiles</a></p>
+</blockquote>
 <h2 id="step-2-push-image-to-remote-server"><a class="header" href="#step-2-push-image-to-remote-server">Step 2: Push Image to Remote Server</a></h2>
-<h3 id="1-open-terminal-and-cd-to-root-dir-eg-cad24x7"><a class="header" href="#1-open-terminal-and-cd-to-root-dir-eg-cad24x7">1. Open terminal and <strong><code>cd</code></strong> to root dir <strong><code>e.g. CAD24x7</code></strong></a></h3>
-<h3 id="2-build-image"><a class="header" href="#2-build-image">2. Build Image</a></h3>
-<pre><code class="language-bash">$ podman build -f CAD.MQ.API/Dockerfile -t cmqapi:latest .
-</code></pre>
 <blockquote>
-<p>ℹ️ <strong>Note</strong></p>
-<p><code>-f</code> path to dockerfile</p>
-<p><code>-t</code> tag name</p>
-</blockquote>
-<h3 id="3-save-image-as-tar"><a class="header" href="#3-save-image-as-tar">3. Save image as <strong><code>.tar</code></strong></a></h3>
-<pre><code class="language-bash">$ podman save -o cmqapi.tar localhost/cmqapi:latest`
-</code></pre>
-<blockquote>
-<p>ℹ️ <strong>Note</strong></p>
-<p><code>localhost</code> is automatically prepended in the previous step because we're not specifying a public registry or a namespace</p>
-<p>This is Podmans way of indicating that this is a "<em>local image</em>", and has not been pulled or pushed to a remote repository</p>
-</blockquote>
-<h3 id="4-push-tar"><a class="header" href="#4-push-tar">4. Push <strong><code>.tar</code></strong></a></h3>
-<pre><code class="language-bash">$ scp cmqapi.tar lev013@uit1446.govt.hcg.local:/home/lev013
-</code></pre>
-<blockquote>
-<p>ℹ️ <strong>Note</strong></p>
-<p>Pushing to <code>user@hostname:homedir</code></p>
+<p>🏷️ <a href="quickstart/../localenv/push_to_remote_server.html"><strong>Local Environment:</strong> Push To Remote Server</a></p>
 </blockquote>
 <h2 id="step-3-extract-image-on-remote-server"><a class="header" href="#step-3-extract-image-on-remote-server">Step 3: Extract image on Remote Server</a></h2>
 <h3 id="1-open-terminal-and-cd-to-dir-containing-image-tar"><a class="header" href="#1-open-terminal-and-cd-to-dir-containing-image-tar">1. Open terminal and cd to dir containing image .tar</a></h3>
@@ -438,8 +497,18 @@ Install Podman GUI and work</p>
 </ul>
 </li>
 <li>
-<p><input disabled="" type="checkbox"/>
+<p><input disabled="" type="checkbox" checked=""/>
 Look into Container auto starting after server patching/restarting</p>
+<ul>
+<li>Working through a couple solutions, but successfully implemented with systemd unit file and by deploying container directly as system (root) user</li>
+</ul>
+</li>
+<li>
+<p><input disabled="" type="checkbox" checked=""/>
+Generic CAD user to manage apps</p>
+<ul>
+<li>Running apps under your own user doesn't really make sense... just created 'CAD' user to deploy from for now</li>
+</ul>
 </li>
 <li>
 <p><input disabled="" type="checkbox"/>
@@ -447,11 +516,11 @@ Include a nuget.config file to identify the private stream via URL and credentia
 </li>
 <li>
 <p><input disabled="" type="checkbox"/>
-Generalized CAD user to manage apps</p>
+Condense containerization cmds into PS script (make sure script removes .tar after we scp to server)</p>
 </li>
 <li>
 <p><input disabled="" type="checkbox"/>
-Condense containerization cmds into PS script (make sure script removes .tar after we scp to server)</p>
+Should we consider setting up a private registry? That way everyone can push/pull from here. We can host this on any server.</p>
 </li>
 <li>
 <p><input disabled="" type="checkbox"/>
