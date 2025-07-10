@@ -19,13 +19,13 @@
 ### 1. Open terminal and cd to dir containing image .tar
 ### 2. Load image from **`.tar`**
 
-```bash
+```shell
 $ podman load -i cmqapi.tar
 ```
 
 ## Step 4: Start App in Container
 ### 1. Start a container
-```bash
+```shell
 $ podman run -d -p 8080:8080 --name cmqapi localhost/cmqapi:latest
 ```
 > ℹ️ **Note**

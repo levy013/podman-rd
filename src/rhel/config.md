@@ -5,7 +5,7 @@
 
 By default, `firewalld` does not allow http requests.
 
-```bash
+```shell
 $ sudo firewall-cmd --add-service=http --permanent
 
 $ sudo firewall-cmd --reload
@@ -22,6 +22,6 @@ However, when SELinux enforcing mode is enabled, outbound network connections ar
 
 Instead of setting SELinux to permissive mode, we can simply allow services to make outbound connections using TCP:
 
-```bash
+```shell
 $ sudo setsebool -P httpd_can_network_connect on
 ```

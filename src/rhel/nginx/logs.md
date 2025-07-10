@@ -1,10 +1,10 @@
 # Nginx
 ## Error Log: 
-```bash
+```shell
 $ sudo less /var/log/nginx/error.log
 ```
 
 ## Access Log: 
-```bash
+```shell
 $ sudo less /var/log/nginx/access.log
 ```

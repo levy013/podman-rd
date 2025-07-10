@@ -178,28 +178,33 @@
 </blockquote>
 <p>🔗 <a href="https://github.com/containers/podman/releases/download/v5.5.2/podman-5.5.2-setup.exe" target="_blank">Install Podman CLI</a></p>
 <p>🔗 <a href="https://github.com/containers/podman/blob/main/docs/tutorials/podman-for-windows.md" target="_blank">Docs: Podman for Windows</a></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="building-images"><a class="header" href="#building-images">Building Images</a></h1>
+<blockquote>
+<p>⛔ <strong>Requirements</strong></p>
+<p>🏷️ <a href="localenv/../localenv/config.html#install_podman_locally"><strong>Local Environment</strong>: Config / Install Podman Locally</a></p>
+</blockquote>
+<h2 id="example-using-cadmqapi"><a class="header" href="#example-using-cadmqapi">Example using CAD.MQ.API</a></h2>
+<pre><code class="language-shell">$ podman build -f CAD.MQ.API/Dockerfile -t cadmq-api:latest .
+</code></pre>
+<p>🔗 <a href="https://docs.podman.io/en/stable/markdown/podman-build.1.html" target="_blank">Documentation: podman-build</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="push-image-to-remote-server"><a class="header" href="#push-image-to-remote-server">Push Image to Remote Server</a></h1>
 <blockquote>
 <p>⚠️ <strong>Warning</strong></p>
 <p>This may become a script at some point</p>
 </blockquote>
 <h2 id="1-open-terminal-and-cd-to-root-dir-eg-cad24x7"><a class="header" href="#1-open-terminal-and-cd-to-root-dir-eg-cad24x7">1. Open terminal and <strong><code>cd</code></strong> to root dir <strong><code>e.g. CAD24x7</code></strong></a></h2>
-<pre><code class="language-bash">$ pwd
+<pre><code class="language-shell">$ pwd
 /c/git/CAD24x7
 
 $ ls
 CAD CAD.API CAD.BL ... etc.
 </code></pre>
 <h2 id="2-build-image"><a class="header" href="#2-build-image">2. Build Image</a></h2>
-<pre><code class="language-bash">$ podman build -f CAD.MQ.API/Dockerfile -t cadmq-api:latest .
-</code></pre>
 <blockquote>
-<p>ℹ️ <strong>Note</strong></p>
-<p><code>-f</code> path to dockerfile</p>
-<p><code>-t</code> tag name</p>
+<p>🏷️ <a href="localenv/../localenv/building_images.html"><strong>Local Environment</strong>: Building Images</a></p>
 </blockquote>
 <h2 id="3-save-image-as-tar"><a class="header" href="#3-save-image-as-tar">3. Save image as <strong><code>.tar</code></strong></a></h2>
-<pre><code class="language-bash">$ podman save -o cadmq-api.tar localhost/cadmq-api:latest`
+<pre><code class="language-shell">$ podman save -o myapp.tar localhost/myapp:latest
 </code></pre>
 <blockquote>
 <p>ℹ️ <strong>Note</strong></p>
@@ -207,14 +212,14 @@ CAD CAD.API CAD.BL ... etc.
 <p>This is Podmans way of indicating that this is a "<em>local image</em>", and has not been pulled or pushed to a remote repository</p>
 </blockquote>
 <h2 id="4-push-tar-to-remote-server"><a class="header" href="#4-push-tar-to-remote-server">4. Push <strong><code>.tar</code></strong> to Remote Server</a></h2>
-<pre><code class="language-bash">$ scp cadmq-api.tar cad@uit1446.govt.hcg.local:/home/cad
+<pre><code class="language-shell">$ scp myapp.tar cad@uit1446.govt.hcg.local:/home/cad
 </code></pre>
 <blockquote>
 <p>ℹ️ <strong>Note</strong></p>
 <p>Pushing to <code>user@hostname:homedir</code></p>
 </blockquote>
 <h2 id="5-clean-up-tar"><a class="header" href="#5-clean-up-tar">5. Clean up <strong><code>.tar</code></strong></a></h2>
-<pre><code class="language-bash">$ rm cadmq-api.tar
+<pre><code class="language-shell">$ rm myapp.tar
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="config-1"><a class="header" href="#config-1">Config</a></h1>
 <h2 id="-"><a class="header" href="#-">... 🦗</a></h2>
@@ -234,7 +239,7 @@ CAD CAD.API CAD.BL ... etc.
 <p>🏷️ <a href="podman/../localenv/push_to_remote_server.html">Push Image to Remote Server</a></p>
 </blockquote>
 <h3 id="1-share-image-with-systemroot-user"><a class="header" href="#1-share-image-with-systemroot-user">1. Share image with system/root user</a></h3>
-<pre><code class="language-bash">$ podman image scp USERNAME@localhost::$IMAGE root@localhost::
+<pre><code class="language-shell">$ podman image scp USERNAME@localhost::$IMAGE root@localhost::
 </code></pre>
 <h3 id="2-navigate-to-containers-tab-and-run-container-with-these-mods"><a class="header" href="#2-navigate-to-containers-tab-and-run-container-with-these-mods">2. Navigate to containers tab and run container with these mods:</a></h3>
 <ul>
@@ -249,40 +254,57 @@ CAD CAD.API CAD.BL ... etc.
 <p>🔗 <a href="https://www.redhat.com/en/blog/container-systemd-persist-reboot" target="_blank">Configure a container to start automatically as a systemd service</a></p>
 <p>This method is technically deprecated, though many users still prefer this approach - it's now recommended to use Quadlets when interacting with systemd</p>
 </blockquote>
-<h3 id="1-mkdir-for-systemd-file"><a class="header" href="#1-mkdir-for-systemd-file">1. Mkdir for systemd file</a></h3>
+<h3 id="1-create-user-directory-for-service-file"><a class="header" href="#1-create-user-directory-for-service-file">1. Create user directory for <strong><code>.service</code></strong> file</a></h3>
 <blockquote>
 <p>⚠️<strong>Warning</strong></p>
-<p>This only needs to be done once. If this is a new server (assuming it hasn't been done)</p>
+<p>This only needs to be done once for a user.</p>
+<p>The <code>-p</code> flag will prevent us from creating anything if the path already exists.</p>
+<p>The path is actually for <code>/user/</code></p>
 </blockquote>
-<pre><code class="language-bash">$ mkdir -p ~/.config/systemd/user/
+<pre><code class="language-shell">$ mkdir -p ~/.config/systemd/user/
 </code></pre>
 <h3 id="2-start-a-container"><a class="header" href="#2-start-a-container">2. Start a container</a></h3>
-<p>🏷️ <a href="podman/../podman/running_containers.html">Running Containers</a></p>
-<h3 id="3-generate-systemd-files-for-the-running-container"><a class="header" href="#3-generate-systemd-files-for-the-running-container">3. Generate systemd files for the running container</a></h3>
-<pre><code class="language-bash">$ podman generate systemd --new --files --name myapp
+<blockquote>
+<p>🏷️ <a href="podman/../podman/running_containers.html"><strong>Podman</strong>: Running Containers</a></p>
+</blockquote>
+<h3 id="3-generate-a-systemd-service-file"><a class="header" href="#3-generate-a-systemd-service-file">3. Generate a systemd <strong><code>.service</code></strong> file</a></h3>
+<pre><code class="language-shell">$ podman generate systemd --new --files --name myapp
 </code></pre>
+<blockquote>
+<p>ℹ️ <strong>Note</strong></p>
+<p>The service file will contain all of the required parameters to run the container in it's current state. We can preview the file with the following cmd</p>
+<pre><code class="language-shell">$ less ~/.config/systemd/user/myapp.service
+</code></pre>
+</blockquote>
 <h3 id="4-stop-the-container"><a class="header" href="#4-stop-the-container">4. Stop the container</a></h3>
-<pre><code class="language-bash">$ podman stop myapp &amp;&amp; podman rm -a &amp;&amp; podman volume prune myapp
+<pre><code class="language-shell">$ podman stop myapp
 </code></pre>
-<h3 id="5-copy-unit-file-into-dir"><a class="header" href="#5-copy-unit-file-into-dir">5. Copy unit file into dir</a></h3>
-<pre><code class="language-bash">$ cp -Z container-myapp.service ~/.config/systemd/user/
+<h3 id="5-copy-service-file-into-user-dir"><a class="header" href="#5-copy-service-file-into-user-dir">5. Copy <strong><code>.service</code></strong> file into user dir</a></h3>
+<pre><code class="language-shell">$ cp -Z container-myapp.service ~/.config/systemd/user/
 </code></pre>
 <h3 id="6-reload-user-level-systemctl-daemon"><a class="header" href="#6-reload-user-level-systemctl-daemon">6. Reload user level systemctl daemon</a></h3>
-<pre><code class="language-bash">$ systemctl --user daemon-reload
+<pre><code class="language-shell">$ systemctl --user daemon-reload
 </code></pre>
-<p>We can start container using systemd now instead</p>
-<pre><code class="language-bash">$ systemctl --user start container-myapp.service
+<hr />
+<h3 id="now-we-can-start-containers-via-systemctl"><a class="header" href="#now-we-can-start-containers-via-systemctl">Now we can start containers via <strong><code>systemctl</code></strong></a></h3>
+<pre><code class="language-shell">$ systemctl --user start container-myapp.service
 </code></pre>
-<h3 id="7-add-to-startstop-of-system"><a class="header" href="#7-add-to-startstop-of-system">7. Add to start/stop of system</a></h3>
+<h3 id="addremove-from-systemd-services"><a class="header" href="#addremove-from-systemd-services">Add/Remove from systemd services</a></h3>
 <h4 id="add"><a class="header" href="#add">Add</a></h4>
-<pre><code class="language-bash">$ systemctl --user enable container-cadmq-api.service
+<pre><code class="language-shell">$ systemctl --user enable container-cadmq-api.service
 </code></pre>
 <h4 id="remove"><a class="header" href="#remove">Remove</a></h4>
-<pre><code class="language-bash">$ systemctl --user stop container-cadmq-api.service
+<pre><code class="language-shell">$ systemctl --user stop container-cadmq-api.service
 </code></pre>
 <h2 id="method-3-quadlets"><a class="header" href="#method-3-quadlets">Method 3: Quadlets</a></h2>
 <h3 id="--1"><a class="header" href="#--1">... 🦗</a></h3>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="dockerfiles"><a class="header" href="#dockerfiles">Dockerfiles</a></h1>
+<h2 id="what-is-a-dockerfile"><a class="header" href="#what-is-a-dockerfile">What is a dockerfile?</a></h2>
+<blockquote>
+<p>A Dockerfile is a text document that contains all the commands a user could call on the command line to assemble an image.</p>
+</blockquote>
+<p>🔗 <a href="https://docs.docker.com/reference/dockerfile/" target="_blank">Dockerfile</a></p>
+<h3 id="example-dockerfile-for-cadmqapi"><a class="header" href="#example-dockerfile-for-cadmqapi">Example dockerfile for <strong><code>CAD.MQ.API</code></strong></a></h3>
 <pre><code class="language-dockerfile"># Set up .NET runtime env
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 WORKDIR /app
@@ -308,33 +330,40 @@ COPY --from=publish /app/publish .
 
 ENTRYPOINT ["dotnet", "CAD.MQ.API.dll"]
 </code></pre>
-<p>Super High-Level explanation of a dockerfile</p>
-<p>Dockerfiles are powerful because they leverage a concept called layered caching to efficiently build images of an application. Without caching, we would need to do things like reinstall dependencies and recompile the source code every single time we rebuild an image 🫣</p>
-<pre><code>A dockerfile is essentially just a chain of sequential commands called layers. e.g. FROM, COPY, RUN, etc.
-These layers are cached and evaluated sequentially.
-A layer's cache is invalidated if
-    the underlying command changes
-    any files it depends on changes
-    any prior layer has been invalidated, e.g. if we change the .NET runtime from aspnet:9.0 to aspnet:10.0, we would essentially need to rebuild the entire image
-.dockerignore files can help with preventing unneseccary cache invalidation due to changes in dotfiles like .git or changes in bin/ and obj/
+<p>A Dockerfile is essentially just a chain of sequential commands called "layers". e.g. <code>FROM</code>, <code>COPY</code>, <code>RUN</code></p>
+<p>These layers are cached and evaluated sequentially.</p>
+<h3 id="cache-invalidation"><a class="header" href="#cache-invalidation">Cache invalidation</a></h3>
+<blockquote>
+<p>Dockerfiles leverage a concept called <code>layered caching</code> to efficiently build images of an application. Without caching, you would need to do things like reinstall dependencies and recompile the source code every single time you rebuild an image.</p>
+</blockquote>
+<p>🔗 <a href="https://docs.docker.com/build/cache/" target="_blank">Docker build cache</a></p>
+<p>A layer's cache is invalidated if</p>
+<ol>
+<li>the layer's underlying command (instruction) changes</li>
+<li>the layer's underlying source file (code) changes</li>
+<li>any prior layer's cache has been invalidated</li>
+</ol>
+<h4 id="eg-changing-the-net-runtime"><a class="header" href="#eg-changing-the-net-runtime">e.g. Changing the .NET runtime</a></h4>
+<p>from <code>aspnet:9.0</code></p>
+<pre><code class="language-Dockerfile">FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base 
 </code></pre>
-<p>Example:</p>
-<p>❌ Bad</p>
-<p>COPY . .
-RUN dotnet restore #runs even if we simply added a comment or removed whitespace</p>
-<p>✔️ Good</p>
-<p>COPY project.csproj .
-RUN dotnet restore #only runs if the .csproj changes</p>
-<p>COPY . .
-RUN dotnet build #only runs if the source code changes</p>
-<p>... there's some nuance here, but you get the idea</p>
-<p>📝Caching Dockerfiles</p>
+<p>to <code>aspnet:10.0</code></p>
+<pre><code class="language-Dockerfile">FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base 
+</code></pre>
+<p>This would invalidate the cache of the entire Dockerfile since this is the first line in the file.</p>
+<h3 id="ignoring-files-from-build-process"><a class="header" href="#ignoring-files-from-build-process">Ignoring files from build process</a></h3>
+<blockquote>
+<p>You can use a <code>.dockerignore</code> file to exclude files or directories from the build context.</p>
+<p>This is useful for preventing unneseccary cache invalidation from to changes to dotfiles like <code>.git</code>, or from changes in directories like <code>bin/</code> and <code>obj/</code></p>
+</blockquote>
+<p>🔗 <a href="https://docs.docker.com/build/concepts/context/#dockerignore-files" target="_blank">.dockerignore</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="running-containers"><a class="header" href="#running-containers">Running Containers</a></h1>
+<p>https://docs.podman.io/en/stable/markdown/podman-run.1.html</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="config-2"><a class="header" href="#config-2">Config</a></h1>
 <h2 id="configure-firewalld-for-http"><a class="header" href="#configure-firewalld-for-http">Configure <strong><code>firewalld</code></strong> for http</a></h2>
 <p>🔗 <a href="https://www.redhat.com/en/blog/firewalld-linux-firewall">RHEL firewalld Docs</a></p>
 <p>By default, <code>firewalld</code> does not allow http requests.</p>
-<pre><code class="language-bash">$ sudo firewall-cmd --add-service=http --permanent
+<pre><code class="language-shell">$ sudo firewall-cmd --add-service=http --permanent
 
 $ sudo firewall-cmd --reload
 </code></pre>
@@ -346,14 +375,14 @@ $ sudo firewall-cmd --reload
 <p>connect() to 127.0.0.1:8080 failed (13: Permission denied)</p>
 </blockquote>
 <p>Instead of setting SELinux to permissive mode, we can simply allow services to make outbound connections using TCP:</p>
-<pre><code class="language-bash">$ sudo setsebool -P httpd_can_network_connect on
+<pre><code class="language-shell">$ sudo setsebool -P httpd_can_network_connect on
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="cockpit"><a class="header" href="#cockpit">Cockpit</a></h1>
 <h2 id="--2"><a class="header" href="#--2">... 🦗</a></h2>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="nginx"><a class="header" href="#nginx">Nginx</a></h1>
 <h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
 <p>🔗 <a href="https://nginx.org/en/docs/index.html" target="_blank">Nginx Documentation</a></p>
-<pre><code class="language-bash">sudo dnf install nginx
+<pre><code class="language-shell">sudo dnf install nginx
 
 sudo systemctl enable --now nginx
 </code></pre>
@@ -430,10 +459,10 @@ sudo systemctl enable --now nginx
 </blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="nginx-2"><a class="header" href="#nginx-2">Nginx</a></h1>
 <h2 id="error-log"><a class="header" href="#error-log">Error Log:</a></h2>
-<pre><code class="language-bash">$ sudo less /var/log/nginx/error.log
+<pre><code class="language-shell">$ sudo less /var/log/nginx/error.log
 </code></pre>
 <h2 id="access-log"><a class="header" href="#access-log">Access Log:</a></h2>
-<pre><code class="language-bash">$ sudo less /var/log/nginx/access.log
+<pre><code class="language-shell">$ sudo less /var/log/nginx/access.log
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="containerize-an-application"><a class="header" href="#containerize-an-application">Containerize an Application</a></h1>
 <blockquote>
@@ -456,11 +485,11 @@ sudo systemctl enable --now nginx
 <h2 id="step-3-extract-image-on-remote-server"><a class="header" href="#step-3-extract-image-on-remote-server">Step 3: Extract image on Remote Server</a></h2>
 <h3 id="1-open-terminal-and-cd-to-dir-containing-image-tar"><a class="header" href="#1-open-terminal-and-cd-to-dir-containing-image-tar">1. Open terminal and cd to dir containing image .tar</a></h3>
 <h3 id="2-load-image-from-tar"><a class="header" href="#2-load-image-from-tar">2. Load image from <strong><code>.tar</code></strong></a></h3>
-<pre><code class="language-bash">$ podman load -i cmqapi.tar
+<pre><code class="language-shell">$ podman load -i cmqapi.tar
 </code></pre>
 <h2 id="step-4-start-app-in-container"><a class="header" href="#step-4-start-app-in-container">Step 4: Start App in Container</a></h2>
 <h3 id="1-start-a-container"><a class="header" href="#1-start-a-container">1. Start a container</a></h3>
-<pre><code class="language-bash">$ podman run -d -p 8080:8080 --name cmqapi localhost/cmqapi:latest
+<pre><code class="language-shell">$ podman run -d -p 8080:8080 --name cmqapi localhost/cmqapi:latest
 </code></pre>
 <blockquote>
 <p>ℹ️ <strong>Note</strong></p>
@@ -509,6 +538,10 @@ Generic CAD user to manage apps</p>
 <ul>
 <li>Running apps under your own user doesn't really make sense... just created 'CAD' user to deploy from for now</li>
 </ul>
+</li>
+<li>
+<p><input disabled="" type="checkbox"/>
+Look into quadlets</p>
 </li>
 <li>
 <p><input disabled="" type="checkbox"/>

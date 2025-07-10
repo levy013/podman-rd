@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Dockerfiles - cad-containters</title>
+        <title>Building Images - cad-containters</title>
 
 
         <!-- Custom HTML head -->
@@ -166,75 +166,25 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="dockerfiles"><a class="header" href="#dockerfiles">Dockerfiles</a></h1>
-<h2 id="what-is-a-dockerfile"><a class="header" href="#what-is-a-dockerfile">What is a dockerfile?</a></h2>
+                        <h1 id="building-images"><a class="header" href="#building-images">Building Images</a></h1>
 <blockquote>
-<p>A Dockerfile is a text document that contains all the commands a user could call on the command line to assemble an image.</p>
+<p>⛔ <strong>Requirements</strong></p>
+<p>🏷️ <a href="../localenv/config.html#install_podman_locally"><strong>Local Environment</strong>: Config / Install Podman Locally</a></p>
 </blockquote>
-<p>🔗 <a href="https://docs.docker.com/reference/dockerfile/" target="_blank">Dockerfile</a></p>
-<h3 id="example-dockerfile-for-cadmqapi"><a class="header" href="#example-dockerfile-for-cadmqapi">Example dockerfile for <strong><code>CAD.MQ.API</code></strong></a></h3>
-<pre><code class="language-dockerfile"># Set up .NET runtime env
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
-WORKDIR /app
-EXPOSE 8080
-
-# Build Project
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
-ARG BUILD_CONFIGURATION=Release
-WORKDIR /src 
-COPY ["/CAD.MQ.API/CAD.MQ.API.csproj", "CAD.MQ.API/"]
-RUN dotnet restore "CAD.MQ.API/CAD.MQ.API.csproj"
-COPY . .
-WORKDIR "/src/CAD.MQ.API"
-RUN dotnet build "./CAD.MQ.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
-
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./CAD.MQ.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
-
-FROM base AS final
-WORKDIR /app
-COPY --from=publish /app/publish .
-
-ENTRYPOINT ["dotnet", "CAD.MQ.API.dll"]
+<h2 id="example-using-cadmqapi"><a class="header" href="#example-using-cadmqapi">Example using CAD.MQ.API</a></h2>
+<pre><code class="language-shell">$ podman build -f CAD.MQ.API/Dockerfile -t cadmq-api:latest .
 </code></pre>
-<p>A Dockerfile is essentially just a chain of sequential commands called "layers". e.g. <code>FROM</code>, <code>COPY</code>, <code>RUN</code></p>
-<p>These layers are cached and evaluated sequentially.</p>
-<h3 id="cache-invalidation"><a class="header" href="#cache-invalidation">Cache invalidation</a></h3>
-<blockquote>
-<p>Dockerfiles leverage a concept called <code>layered caching</code> to efficiently build images of an application. Without caching, you would need to do things like reinstall dependencies and recompile the source code every single time you rebuild an image.</p>
-</blockquote>
-<p>🔗 <a href="https://docs.docker.com/build/cache/" target="_blank">Docker build cache</a></p>
-<p>A layer's cache is invalidated if</p>
-<ol>
-<li>the layer's underlying command (instruction) changes</li>
-<li>the layer's underlying source file (code) changes</li>
-<li>any prior layer's cache has been invalidated</li>
-</ol>
-<h4 id="eg-changing-the-net-runtime"><a class="header" href="#eg-changing-the-net-runtime">e.g. Changing the .NET runtime</a></h4>
-<p>from <code>aspnet:9.0</code></p>
-<pre><code class="language-Dockerfile">FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base 
-</code></pre>
-<p>to <code>aspnet:10.0</code></p>
-<pre><code class="language-Dockerfile">FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base 
-</code></pre>
-<p>This would invalidate the cache of the entire Dockerfile since this is the first line in the file.</p>
-<h3 id="ignoring-files-from-build-process"><a class="header" href="#ignoring-files-from-build-process">Ignoring files from build process</a></h3>
-<blockquote>
-<p>You can use a <code>.dockerignore</code> file to exclude files or directories from the build context.</p>
-<p>This is useful for preventing unneseccary cache invalidation from to changes to dotfiles like <code>.git</code>, or from changes in directories like <code>bin/</code> and <code>obj/</code></p>
-</blockquote>
-<p>🔗 <a href="https://docs.docker.com/build/concepts/context/#dockerignore-files" target="_blank">.dockerignore</a></p>
+<p>🔗 <a href="https://docs.podman.io/en/stable/markdown/podman-build.1.html" target="_blank">Documentation: podman-build</a></p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../podman/autostart.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../localenv/config.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../podman/running_containers.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../localenv/push_to_remote_server.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -244,11 +194,11 @@ ENTRYPOINT ["dotnet", "CAD.MQ.API.dll"]
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../podman/autostart.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../localenv/config.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../podman/running_containers.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../localenv/push_to_remote_server.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

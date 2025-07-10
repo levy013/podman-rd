@@ -5,7 +5,7 @@
 > This may become a script at some point 
 
 ## 1. Open terminal and **`cd`** to root dir **`e.g. CAD24x7`**
-```bash
+```shell
 $ pwd
 /c/git/CAD24x7
 
@@ -14,22 +14,12 @@ CAD CAD.API CAD.BL ... etc.
 ```
 
 ## 2. Build Image 
-
-
-```bash
-$ podman build -f CAD.MQ.API/Dockerfile -t cadmq-api:latest .
-```
-
-> ℹ️ **Note** 
->
-> `-f` path to dockerfile
->
-> `-t` tag name
+> 🏷️ [**Local Environment**: Building Images](../localenv/building_images.md)
 
 ## 3. Save image as **`.tar`**
 
-```bash
-$ podman save -o cadmq-api.tar localhost/cadmq-api:latest`
+```shell
+$ podman save -o myapp.tar localhost/myapp:latest
 ```
 
 
@@ -41,8 +31,8 @@ $ podman save -o cadmq-api.tar localhost/cadmq-api:latest`
 
 ## 4. Push **`.tar`** to Remote Server
 
-```bash
-$ scp cadmq-api.tar cad@uit1446.govt.hcg.local:/home/cad
+```shell
+$ scp myapp.tar cad@uit1446.govt.hcg.local:/home/cad
 ```
 
 > ℹ️ **Note** 
@@ -50,6 +40,6 @@ $ scp cadmq-api.tar cad@uit1446.govt.hcg.local:/home/cad
 > Pushing to `user@hostname:homedir`
 
 ## 5. Clean up **`.tar`**
-```bash
-$ rm cadmq-api.tar
+```shell
+$ rm myapp.tar
 ```

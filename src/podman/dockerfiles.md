@@ -1,5 +1,12 @@
 # Dockerfiles
 
+## What is a dockerfile?
+> A Dockerfile is a text document that contains all the commands a user could call on the command line to assemble an image.
+
+
+🔗 <a href="https://docs.docker.com/reference/dockerfile/" target="_blank">Dockerfile</a>
+
+### Example dockerfile for **`CAD.MQ.API`**
 ```dockerfile
 # Set up .NET runtime env
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
@@ -26,33 +33,37 @@ COPY --from=publish /app/publish .
 
 ENTRYPOINT ["dotnet", "CAD.MQ.API.dll"]
 ```
-Super High-Level explanation of a dockerfile
 
-Dockerfiles are powerful because they leverage a concept called layered caching to efficiently build images of an application. Without caching, we would need to do things like reinstall dependencies and recompile the source code every single time we rebuild an image 🫣
+A Dockerfile is essentially just a chain of sequential commands called "layers". e.g. `FROM`, `COPY`, `RUN`
 
-    A dockerfile is essentially just a chain of sequential commands called layers. e.g. FROM, COPY, RUN, etc.
-    These layers are cached and evaluated sequentially.
-    A layer's cache is invalidated if
-        the underlying command changes
-        any files it depends on changes
-        any prior layer has been invalidated, e.g. if we change the .NET runtime from aspnet:9.0 to aspnet:10.0, we would essentially need to rebuild the entire image
-    .dockerignore files can help with preventing unneseccary cache invalidation due to changes in dotfiles like .git or changes in bin/ and obj/
+These layers are cached and evaluated sequentially.
 
-Example:
+### Cache invalidation
+> Dockerfiles leverage a concept called `layered caching` to efficiently build images of an application. Without caching, you would need to do things like reinstall dependencies and recompile the source code every single time you rebuild an image.
 
-❌ Bad
+🔗 <a href="https://docs.docker.com/build/cache/" target="_blank">Docker build cache</a>
 
-COPY . .
-RUN dotnet restore #runs even if we simply added a comment or removed whitespace 
+A layer's cache is invalidated if 
+1. the layer's underlying command (instruction) changes 
+2. the layer's underlying source file (code) changes 
+3. any prior layer's cache has been invalidated
 
-✔️ Good
+#### e.g. Changing the .NET runtime 
+ from `aspnet:9.0` 
+```Dockerfile
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base 
+```
 
-COPY project.csproj .
-RUN dotnet restore #only runs if the .csproj changes 
+to `aspnet:10.0`
+```Dockerfile
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base 
+```
 
-COPY . .
-RUN dotnet build #only runs if the source code changes
+This would invalidate the cache of the entire Dockerfile since this is the first line in the file.
 
-... there's some nuance here, but you get the idea
+### Ignoring files from build process 
+> You can use a `.dockerignore` file to exclude files or directories from the build context.
+>
+> This is useful for preventing unneseccary cache invalidation from to changes to dotfiles like `.git`, or from changes in directories like `bin/` and `obj/`
 
-📝Caching Dockerfiles
+🔗 <a href="https://docs.docker.com/build/concepts/context/#dockerignore-files" target="_blank">.dockerignore</a>

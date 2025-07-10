@@ -187,11 +187,11 @@
 <h2 id="step-3-extract-image-on-remote-server"><a class="header" href="#step-3-extract-image-on-remote-server">Step 3: Extract image on Remote Server</a></h2>
 <h3 id="1-open-terminal-and-cd-to-dir-containing-image-tar"><a class="header" href="#1-open-terminal-and-cd-to-dir-containing-image-tar">1. Open terminal and cd to dir containing image .tar</a></h3>
 <h3 id="2-load-image-from-tar"><a class="header" href="#2-load-image-from-tar">2. Load image from <strong><code>.tar</code></strong></a></h3>
-<pre><code class="language-bash">$ podman load -i cmqapi.tar
+<pre><code class="language-shell">$ podman load -i cmqapi.tar
 </code></pre>
 <h2 id="step-4-start-app-in-container"><a class="header" href="#step-4-start-app-in-container">Step 4: Start App in Container</a></h2>
 <h3 id="1-start-a-container"><a class="header" href="#1-start-a-container">1. Start a container</a></h3>
-<pre><code class="language-bash">$ podman run -d -p 8080:8080 --name cmqapi localhost/cmqapi:latest
+<pre><code class="language-shell">$ podman run -d -p 8080:8080 --name cmqapi localhost/cmqapi:latest
 </code></pre>
 <blockquote>
 <p>ℹ️ <strong>Note</strong></p>

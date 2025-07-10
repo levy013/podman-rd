@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Push To Remote Server - cad-containters</title>
+        <title>Push Image to Remote Server - cad-containters</title>
 
 
         <!-- Custom HTML head -->
@@ -172,22 +172,18 @@
 <p>This may become a script at some point</p>
 </blockquote>
 <h2 id="1-open-terminal-and-cd-to-root-dir-eg-cad24x7"><a class="header" href="#1-open-terminal-and-cd-to-root-dir-eg-cad24x7">1. Open terminal and <strong><code>cd</code></strong> to root dir <strong><code>e.g. CAD24x7</code></strong></a></h2>
-<pre><code class="language-bash">$ pwd
+<pre><code class="language-shell">$ pwd
 /c/git/CAD24x7
 
 $ ls
 CAD CAD.API CAD.BL ... etc.
 </code></pre>
 <h2 id="2-build-image"><a class="header" href="#2-build-image">2. Build Image</a></h2>
-<pre><code class="language-bash">$ podman build -f CAD.MQ.API/Dockerfile -t cadmq-api:latest .
-</code></pre>
 <blockquote>
-<p>ℹ️ <strong>Note</strong></p>
-<p><code>-f</code> path to dockerfile</p>
-<p><code>-t</code> tag name</p>
+<p>🏷️ <a href="../localenv/building_images.html"><strong>Local Environment</strong>: Building Images</a></p>
 </blockquote>
 <h2 id="3-save-image-as-tar"><a class="header" href="#3-save-image-as-tar">3. Save image as <strong><code>.tar</code></strong></a></h2>
-<pre><code class="language-bash">$ podman save -o cadmq-api.tar localhost/cadmq-api:latest`
+<pre><code class="language-shell">$ podman save -o myapp.tar localhost/myapp:latest
 </code></pre>
 <blockquote>
 <p>ℹ️ <strong>Note</strong></p>
@@ -195,21 +191,21 @@ CAD CAD.API CAD.BL ... etc.
 <p>This is Podmans way of indicating that this is a "<em>local image</em>", and has not been pulled or pushed to a remote repository</p>
 </blockquote>
 <h2 id="4-push-tar-to-remote-server"><a class="header" href="#4-push-tar-to-remote-server">4. Push <strong><code>.tar</code></strong> to Remote Server</a></h2>
-<pre><code class="language-bash">$ scp cadmq-api.tar cad@uit1446.govt.hcg.local:/home/cad
+<pre><code class="language-shell">$ scp myapp.tar cad@uit1446.govt.hcg.local:/home/cad
 </code></pre>
 <blockquote>
 <p>ℹ️ <strong>Note</strong></p>
 <p>Pushing to <code>user@hostname:homedir</code></p>
 </blockquote>
 <h2 id="5-clean-up-tar"><a class="header" href="#5-clean-up-tar">5. Clean up <strong><code>.tar</code></strong></a></h2>
-<pre><code class="language-bash">$ rm cadmq-api.tar
+<pre><code class="language-shell">$ rm myapp.tar
 </code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../localenv/config.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../localenv/building_images.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
@@ -223,7 +219,7 @@ CAD CAD.API CAD.BL ... etc.
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../localenv/config.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../localenv/building_images.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 

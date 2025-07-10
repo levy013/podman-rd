@@ -14,6 +14,8 @@
 - [x] Generic CAD user to manage apps
     - Running apps under your own user doesn't really make sense... just created 'CAD' user to deploy from for now
 
+- [ ] Look into quadlets
+
 - [ ] Include a nuget.config file to identify the private stream via URL and credentials.
 
 - [ ] Condense containerization cmds into PS script (make sure script removes .tar after we scp to server)

@@ -170,7 +170,7 @@
 <h2 id="configure-firewalld-for-http"><a class="header" href="#configure-firewalld-for-http">Configure <strong><code>firewalld</code></strong> for http</a></h2>
 <p>🔗 <a href="https://www.redhat.com/en/blog/firewalld-linux-firewall">RHEL firewalld Docs</a></p>
 <p>By default, <code>firewalld</code> does not allow http requests.</p>
-<pre><code class="language-bash">$ sudo firewall-cmd --add-service=http --permanent
+<pre><code class="language-shell">$ sudo firewall-cmd --add-service=http --permanent
 
 $ sudo firewall-cmd --reload
 </code></pre>
@@ -182,7 +182,7 @@ $ sudo firewall-cmd --reload
 <p>connect() to 127.0.0.1:8080 failed (13: Permission denied)</p>
 </blockquote>
 <p>Instead of setting SELinux to permissive mode, we can simply allow services to make outbound connections using TCP:</p>
-<pre><code class="language-bash">$ sudo setsebool -P httpd_can_network_connect on
+<pre><code class="language-shell">$ sudo setsebool -P httpd_can_network_connect on
 </code></pre>
 
                     </main>

@@ -3,7 +3,7 @@
 ## Installation
 🔗 <a href="https://nginx.org/en/docs/index.html" target="_blank">Nginx Documentation</a>
 
-```bash
+```shell
 sudo dnf install nginx
 
 sudo systemctl enable --now nginx

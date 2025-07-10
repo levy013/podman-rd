@@ -15,7 +15,7 @@
 > 🏷️ [Push Image to Remote Server](../localenv/push_to_remote_server.md)
 
 ### 1. Share image with system/root user
-```bash
+```shell
 $ podman image scp USERNAME@localhost::$IMAGE root@localhost::
 ```
 
@@ -34,51 +34,62 @@ $ podman image scp USERNAME@localhost::$IMAGE root@localhost::
 >
 > This method is technically deprecated, though many users still prefer this approach - it's now recommended to use Quadlets when interacting with systemd
 
-### 1. Mkdir for systemd file
+### 1. Create user directory for **`.service`** file
 > ⚠️**Warning**
 >
-> This only needs to be done once. If this is a new server (assuming it hasn't been done)
+> This only needs to be done once for a user. 
+>
+>The `-p` flag will prevent us from creating anything if the path already exists.
+>
+> The path is actually for `/user/`
 
-```bash
+```shell
 $ mkdir -p ~/.config/systemd/user/
 ```
 
 ### 2. Start a container
-🏷️ [Running Containers](../podman/running_containers.md)
+> 🏷️ [**Podman**: Running Containers](../podman/running_containers.md)
 
-### 3. Generate systemd files for the running container 
-```bash
+### 3. Generate a systemd **`.service`** file
+```shell
 $ podman generate systemd --new --files --name myapp
 ```
+> ℹ️ **Note**
+>
+> The service file will contain all of the required parameters to run the container in it's current state. We can preview the file with the following cmd
+> ```shell 
+> $ less ~/.config/systemd/user/myapp.service
+> ```
 
 ### 4. Stop the container
-```bash
-$ podman stop myapp && podman rm -a && podman volume prune myapp
+```shell
+$ podman stop myapp
 ```
 
-### 5. Copy unit file into dir
-```bash
+### 5. Copy **`.service`** file into user dir
+```shell
 $ cp -Z container-myapp.service ~/.config/systemd/user/
 ```
 
 ### 6. Reload user level systemctl daemon
-```bash
+```shell
 $ systemctl --user daemon-reload
 ```
 
-We can start container using systemd now instead 
-```bash
+---
+### Now we can start containers via **`systemctl`**
+```shell
 $ systemctl --user start container-myapp.service
 ```
 
-### 7. Add to start/stop of system 
+### Add/Remove from systemd services
 #### Add
-```bash
+```shell
 $ systemctl --user enable container-cadmq-api.service
 ```
 
 #### Remove
-```bash
+```shell
 $ systemctl --user stop container-cadmq-api.service
 ```
 

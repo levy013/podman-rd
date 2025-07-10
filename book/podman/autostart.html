@@ -182,7 +182,7 @@
 <p>🏷️ <a href="../localenv/push_to_remote_server.html">Push Image to Remote Server</a></p>
 </blockquote>
 <h3 id="1-share-image-with-systemroot-user"><a class="header" href="#1-share-image-with-systemroot-user">1. Share image with system/root user</a></h3>
-<pre><code class="language-bash">$ podman image scp USERNAME@localhost::$IMAGE root@localhost::
+<pre><code class="language-shell">$ podman image scp USERNAME@localhost::$IMAGE root@localhost::
 </code></pre>
 <h3 id="2-navigate-to-containers-tab-and-run-container-with-these-mods"><a class="header" href="#2-navigate-to-containers-tab-and-run-container-with-these-mods">2. Navigate to containers tab and run container with these mods:</a></h3>
 <ul>
@@ -197,36 +197,47 @@
 <p>🔗 <a href="https://www.redhat.com/en/blog/container-systemd-persist-reboot" target="_blank">Configure a container to start automatically as a systemd service</a></p>
 <p>This method is technically deprecated, though many users still prefer this approach - it's now recommended to use Quadlets when interacting with systemd</p>
 </blockquote>
-<h3 id="1-mkdir-for-systemd-file"><a class="header" href="#1-mkdir-for-systemd-file">1. Mkdir for systemd file</a></h3>
+<h3 id="1-create-user-directory-for-service-file"><a class="header" href="#1-create-user-directory-for-service-file">1. Create user directory for <strong><code>.service</code></strong> file</a></h3>
 <blockquote>
 <p>⚠️<strong>Warning</strong></p>
-<p>This only needs to be done once. If this is a new server (assuming it hasn't been done)</p>
+<p>This only needs to be done once for a user.</p>
+<p>The <code>-p</code> flag will prevent us from creating anything if the path already exists.</p>
+<p>The path is actually for <code>/user/</code></p>
 </blockquote>
-<pre><code class="language-bash">$ mkdir -p ~/.config/systemd/user/
+<pre><code class="language-shell">$ mkdir -p ~/.config/systemd/user/
 </code></pre>
 <h3 id="2-start-a-container"><a class="header" href="#2-start-a-container">2. Start a container</a></h3>
-<p>🏷️ <a href="../podman/running_containers.html">Running Containers</a></p>
-<h3 id="3-generate-systemd-files-for-the-running-container"><a class="header" href="#3-generate-systemd-files-for-the-running-container">3. Generate systemd files for the running container</a></h3>
-<pre><code class="language-bash">$ podman generate systemd --new --files --name myapp
+<blockquote>
+<p>🏷️ <a href="../podman/running_containers.html"><strong>Podman</strong>: Running Containers</a></p>
+</blockquote>
+<h3 id="3-generate-a-systemd-service-file"><a class="header" href="#3-generate-a-systemd-service-file">3. Generate a systemd <strong><code>.service</code></strong> file</a></h3>
+<pre><code class="language-shell">$ podman generate systemd --new --files --name myapp
 </code></pre>
+<blockquote>
+<p>ℹ️ <strong>Note</strong></p>
+<p>The service file will contain all of the required parameters to run the container in it's current state. We can preview the file with the following cmd</p>
+<pre><code class="language-shell">$ less ~/.config/systemd/user/myapp.service
+</code></pre>
+</blockquote>
 <h3 id="4-stop-the-container"><a class="header" href="#4-stop-the-container">4. Stop the container</a></h3>
-<pre><code class="language-bash">$ podman stop myapp &amp;&amp; podman rm -a &amp;&amp; podman volume prune myapp
+<pre><code class="language-shell">$ podman stop myapp
 </code></pre>
-<h3 id="5-copy-unit-file-into-dir"><a class="header" href="#5-copy-unit-file-into-dir">5. Copy unit file into dir</a></h3>
-<pre><code class="language-bash">$ cp -Z container-myapp.service ~/.config/systemd/user/
+<h3 id="5-copy-service-file-into-user-dir"><a class="header" href="#5-copy-service-file-into-user-dir">5. Copy <strong><code>.service</code></strong> file into user dir</a></h3>
+<pre><code class="language-shell">$ cp -Z container-myapp.service ~/.config/systemd/user/
 </code></pre>
 <h3 id="6-reload-user-level-systemctl-daemon"><a class="header" href="#6-reload-user-level-systemctl-daemon">6. Reload user level systemctl daemon</a></h3>
-<pre><code class="language-bash">$ systemctl --user daemon-reload
+<pre><code class="language-shell">$ systemctl --user daemon-reload
 </code></pre>
-<p>We can start container using systemd now instead</p>
-<pre><code class="language-bash">$ systemctl --user start container-myapp.service
+<hr />
+<h3 id="now-we-can-start-containers-via-systemctl"><a class="header" href="#now-we-can-start-containers-via-systemctl">Now we can start containers via <strong><code>systemctl</code></strong></a></h3>
+<pre><code class="language-shell">$ systemctl --user start container-myapp.service
 </code></pre>
-<h3 id="7-add-to-startstop-of-system"><a class="header" href="#7-add-to-startstop-of-system">7. Add to start/stop of system</a></h3>
+<h3 id="addremove-from-systemd-services"><a class="header" href="#addremove-from-systemd-services">Add/Remove from systemd services</a></h3>
 <h4 id="add"><a class="header" href="#add">Add</a></h4>
-<pre><code class="language-bash">$ systemctl --user enable container-cadmq-api.service
+<pre><code class="language-shell">$ systemctl --user enable container-cadmq-api.service
 </code></pre>
 <h4 id="remove"><a class="header" href="#remove">Remove</a></h4>
-<pre><code class="language-bash">$ systemctl --user stop container-cadmq-api.service
+<pre><code class="language-shell">$ systemctl --user stop container-cadmq-api.service
 </code></pre>
 <h2 id="method-3-quadlets"><a class="header" href="#method-3-quadlets">Method 3: Quadlets</a></h2>
 <h3 id="-"><a class="header" href="#-">... 🦗</a></h3>
