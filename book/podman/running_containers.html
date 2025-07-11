@@ -167,7 +167,16 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="running-containers"><a class="header" href="#running-containers">Running Containers</a></h1>
-<p>https://docs.podman.io/en/stable/markdown/podman-run.1.html</p>
+<h2 id="example-using-cadmqapi"><a class="header" href="#example-using-cadmqapi">Example using CAD.MQ.API</a></h2>
+<pre><code class="language-shell">$ podman run -d -p 8080:8080 --name cmqapi localhost/cmqapi:latest
+</code></pre>
+<blockquote>
+<p>ℹ️ <strong>Note</strong></p>
+<p><code>-d</code> run detached</p>
+<p><code>-p</code> forward port on host to port on container</p>
+<p><code>--name</code> name of container</p>
+</blockquote>
+<p>🔗 <a href=" https://docs.podman.io/en/stable/markdown/podman-run.1.html" target="_blank">Documentation: podman-run</a></p>
 
                     </main>
 

@@ -32,7 +32,7 @@ $ podman save -o myapp.tar localhost/myapp:latest
 ## 4. Push **`.tar`** to Remote Server
 
 ```shell
-$ scp myapp.tar cad@uit1446.govt.hcg.local:/home/cad
+$ scp myapp.tar username@uit1446.govt.hcg.local:/home/username
 ```
 
 > ℹ️ **Note** 
@@ -42,4 +42,19 @@ $ scp myapp.tar cad@uit1446.govt.hcg.local:/home/cad
 ## 5. Clean up **`.tar`**
 ```shell
 $ rm myapp.tar
+```
+
+
+
+## 6. Connect to Remote Server as user via SSH / Log into Cockpit
+
+## 7. Open terminal and cd to homedir containing myapp.tar
+```shell
+$ pwd
+/home/username
+```
+
+## 8. Load image from **`.tar`**
+```shell
+$ podman load -i myapp.tar
 ```

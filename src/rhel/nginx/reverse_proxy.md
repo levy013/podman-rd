@@ -24,7 +24,7 @@ Here is an example using CAD.MQ.API
 
 > ⛔ **Requirements** 
 >
-> 🏷️ [Nginx: Installation](../nginx/installation.md)
+> 🏷️ [**Nginx:** Installation](../nginx/installation.md)
 
 ### 1. Set up custom conf inside of `/etc/nginx/conf.d/`
 > ℹ️ Note

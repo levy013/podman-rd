@@ -174,12 +174,13 @@
 </blockquote>
 <h2 id="method-1-running-container-under-systemroot"><a class="header" href="#method-1-running-container-under-systemroot">Method 1: Running container under system(root)</a></h2>
 <blockquote>
-<p>ℹ️ <strong>Note</strong></p>
-<p>This is not advised. The nice thing about podman is that it allows us to run rootless containers in the first place...</p>
+<p>⚠️ <strong>Warning</strong></p>
+<p><em>This method is not advised.</em></p>
+<p>As a best practice, you shouldn't really be running privileged containers if you don't need to.</p>
 </blockquote>
 <blockquote>
 <p>⛔ <strong>Requirements</strong></p>
-<p>🏷️ <a href="../localenv/push_to_remote_server.html">Push Image to Remote Server</a></p>
+<p>🏷️ <a href="../localenv/push_to_remote_server.html"><strong>Local Environment:</strong> Push Image to Remote Server</a></p>
 </blockquote>
 <h3 id="1-share-image-with-systemroot-user"><a class="header" href="#1-share-image-with-systemroot-user">1. Share image with system/root user</a></h3>
 <pre><code class="language-shell">$ podman image scp USERNAME@localhost::$IMAGE root@localhost::
@@ -190,13 +191,22 @@
 <li>restart policy = always</li>
 <li>integration / port mapping = host: 8080 container: 8080 (just match dockerfile)</li>
 </ul>
-<h2 id="method-2-setting-up-container-to-run-as-a-systemd-service"><a class="header" href="#method-2-setting-up-container-to-run-as-a-systemd-service">Method 2: Setting up container to run as a systemd service</a></h2>
+<h2 id="method-2-setting-up-container-to-run-as-a-user-level-systemd-service"><a class="header" href="#method-2-setting-up-container-to-run-as-a-user-level-systemd-service">Method 2: Setting up container to run as a user-level <strong><code>systemd</code></strong> service</a></h2>
+<blockquote>
+<p>⚠️ <strong>Warning</strong></p>
+<p><em>This method is technically deprecated.</em></p>
+<p>Though many users still prefer this approach, it's now recommended to use 🏷️<a href="../podman/autostart.html#method-3-quadlets"><strong>Podman:</strong> Autostart &gt; Quadlets</a></p>
+</blockquote>
 <blockquote>
 <p>ℹ️ <strong>Note</strong></p>
 <p>Following this guide from RHEL:</p>
 <p>🔗 <a href="https://www.redhat.com/en/blog/container-systemd-persist-reboot" target="_blank">Configure a container to start automatically as a systemd service</a></p>
-<p>This method is technically deprecated, though many users still prefer this approach - it's now recommended to use Quadlets when interacting with systemd</p>
+<p>This method leverages use of the <code>systemd --user</code></p>
+<p>The <code>systemd --user</code> instance privileges and lifecycle match those of the corresponding user.</p>
+<p><em>The user-level instance is distinct from the main, root-level <code>systemd</code> instance that manages the entire operating system, making this much safer to work with.</em></p>
 </blockquote>
+<p><span style="color: red"><strong>Important</strong></span></p>
+<p>Since we're bound to the corresponding user, our services won't actually start until this user has been logged in after reboot.</p>
 <h3 id="1-create-user-directory-for-service-file"><a class="header" href="#1-create-user-directory-for-service-file">1. Create user directory for <strong><code>.service</code></strong> file</a></h3>
 <blockquote>
 <p>⚠️<strong>Warning</strong></p>
@@ -208,7 +218,7 @@
 </code></pre>
 <h3 id="2-start-a-container"><a class="header" href="#2-start-a-container">2. Start a container</a></h3>
 <blockquote>
-<p>🏷️ <a href="../podman/running_containers.html"><strong>Podman</strong>: Running Containers</a></p>
+<p>🏷️ <a href="../podman/running_containers.html"><strong>Podman:</strong> Running Containers</a></p>
 </blockquote>
 <h3 id="3-generate-a-systemd-service-file"><a class="header" href="#3-generate-a-systemd-service-file">3. Generate a systemd <strong><code>.service</code></strong> file</a></h3>
 <pre><code class="language-shell">$ podman generate systemd --new --files --name myapp
@@ -228,15 +238,14 @@
 <h3 id="6-reload-user-level-systemctl-daemon"><a class="header" href="#6-reload-user-level-systemctl-daemon">6. Reload user level systemctl daemon</a></h3>
 <pre><code class="language-shell">$ systemctl --user daemon-reload
 </code></pre>
-<hr />
-<h3 id="now-we-can-start-containers-via-systemctl"><a class="header" href="#now-we-can-start-containers-via-systemctl">Now we can start containers via <strong><code>systemctl</code></strong></a></h3>
-<pre><code class="language-shell">$ systemctl --user start container-myapp.service
-</code></pre>
-<h3 id="addremove-from-systemd-services"><a class="header" href="#addremove-from-systemd-services">Add/Remove from systemd services</a></h3>
-<h4 id="add"><a class="header" href="#add">Add</a></h4>
+<h3 id="7-add-container-to-systemd---user-service"><a class="header" href="#7-add-container-to-systemd---user-service">7. Add container to <strong><code>systemd --user</code></strong> service</a></h3>
 <pre><code class="language-shell">$ systemctl --user enable container-cadmq-api.service
 </code></pre>
-<h4 id="remove"><a class="header" href="#remove">Remove</a></h4>
+<h3 id="additonal-commands"><a class="header" href="#additonal-commands">Additonal Commands</a></h3>
+<h4 id="manually-start-container-via-systemctl"><a class="header" href="#manually-start-container-via-systemctl">Manually start container via <strong><code>systemctl</code></strong></a></h4>
+<pre><code class="language-shell">$ systemctl --user start container-myapp.service
+</code></pre>
+<h4 id="remove-from-systemd-services"><a class="header" href="#remove-from-systemd-services">Remove from <strong><code>systemd</code></strong> services</a></h4>
 <pre><code class="language-shell">$ systemctl --user stop container-cadmq-api.service
 </code></pre>
 <h2 id="method-3-quadlets"><a class="header" href="#method-3-quadlets">Method 3: Quadlets</a></h2>

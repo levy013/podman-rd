@@ -191,7 +191,7 @@ CAD CAD.API CAD.BL ... etc.
 <p>This is Podmans way of indicating that this is a "<em>local image</em>", and has not been pulled or pushed to a remote repository</p>
 </blockquote>
 <h2 id="4-push-tar-to-remote-server"><a class="header" href="#4-push-tar-to-remote-server">4. Push <strong><code>.tar</code></strong> to Remote Server</a></h2>
-<pre><code class="language-shell">$ scp myapp.tar cad@uit1446.govt.hcg.local:/home/cad
+<pre><code class="language-shell">$ scp myapp.tar username@uit1446.govt.hcg.local:/home/username
 </code></pre>
 <blockquote>
 <p>ℹ️ <strong>Note</strong></p>
@@ -199,6 +199,14 @@ CAD CAD.API CAD.BL ... etc.
 </blockquote>
 <h2 id="5-clean-up-tar"><a class="header" href="#5-clean-up-tar">5. Clean up <strong><code>.tar</code></strong></a></h2>
 <pre><code class="language-shell">$ rm myapp.tar
+</code></pre>
+<h2 id="6-connect-to-remote-server-as-user-via-ssh--log-into-cockpit"><a class="header" href="#6-connect-to-remote-server-as-user-via-ssh--log-into-cockpit">6. Connect to Remote Server as user via SSH / Log into Cockpit</a></h2>
+<h2 id="7-open-terminal-and-cd-to-homedir-containing-myapptar"><a class="header" href="#7-open-terminal-and-cd-to-homedir-containing-myapptar">7. Open terminal and cd to homedir containing myapp.tar</a></h2>
+<pre><code class="language-shell">$ pwd
+/home/username
+</code></pre>
+<h2 id="8-load-image-from-tar"><a class="header" href="#8-load-image-from-tar">8. Load image from <strong><code>.tar</code></strong></a></h2>
+<pre><code class="language-shell">$ podman load -i myapp.tar
 </code></pre>
 
                     </main>

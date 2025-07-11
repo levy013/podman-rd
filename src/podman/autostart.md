@@ -6,13 +6,15 @@
 > There are a few different ways to achieve this.
 
 ## Method 1: Running container under system(root)
-> ℹ️ **Note** 
+> ⚠️ **Warning** 
 >
-> This is not advised. The nice thing about podman is that it allows us to run rootless containers in the first place...
+> *This method is not advised.* 
+>
+>As a best practice, you shouldn't really be running privileged containers if you don't need to.
 
 > ⛔ **Requirements** 
 >
-> 🏷️ [Push Image to Remote Server](../localenv/push_to_remote_server.md)
+> 🏷️ [**Local Environment:** Push Image to Remote Server](../localenv/push_to_remote_server.md)
 
 ### 1. Share image with system/root user
 ```shell
@@ -25,14 +27,30 @@ $ podman image scp USERNAME@localhost::$IMAGE root@localhost::
 - integration / port mapping = host: 8080 container: 8080 (just match dockerfile)
 
 
-## Method 2: Setting up container to run as a systemd service
+## Method 2: Setting up container to run as a user-level **`systemd`** service
+> ⚠️ **Warning**
+>
+> *This method is technically deprecated.*
+>
+> Though many users still prefer this approach, it's now recommended to use 🏷️[**Podman:** Autostart > Quadlets](../podman/autostart.md#method-3-quadlets) 
+
 > ℹ️ **Note**
 >
 > Following this guide from RHEL:
 >
 > 🔗 <a href="https://www.redhat.com/en/blog/container-systemd-persist-reboot" target="_blank">Configure a container to start automatically as a systemd service</a>
 >
-> This method is technically deprecated, though many users still prefer this approach - it's now recommended to use Quadlets when interacting with systemd
+> This method leverages use of the `systemd --user`
+>
+> The `systemd --user` instance privileges and lifecycle match those of the corresponding user. 
+>
+> *The user-level instance is distinct from the main, root-level `systemd` instance that manages the entire operating system, making this much safer to work with.* 
+
+<span style="color: red">**Important**</span>
+
+Since we're bound to the corresponding user, our services won't actually start until this user has been logged in after reboot.
+
+
 
 ### 1. Create user directory for **`.service`** file
 > ⚠️**Warning**
@@ -48,7 +66,7 @@ $ mkdir -p ~/.config/systemd/user/
 ```
 
 ### 2. Start a container
-> 🏷️ [**Podman**: Running Containers](../podman/running_containers.md)
+> 🏷️ [**Podman:** Running Containers](../podman/running_containers.md)
 
 ### 3. Generate a systemd **`.service`** file
 ```shell
@@ -76,19 +94,18 @@ $ cp -Z container-myapp.service ~/.config/systemd/user/
 $ systemctl --user daemon-reload
 ```
 
----
-### Now we can start containers via **`systemctl`**
-```shell
-$ systemctl --user start container-myapp.service
-```
-
-### Add/Remove from systemd services
-#### Add
+### 7. Add container to **`systemd --user`** service
 ```shell
 $ systemctl --user enable container-cadmq-api.service
 ```
 
-#### Remove
+### Additonal Commands
+#### Manually start container via **`systemctl`**
+```shell
+$ systemctl --user start container-myapp.service
+```
+
+#### Remove from **`systemd`** services
 ```shell
 $ systemctl --user stop container-cadmq-api.service
 ```

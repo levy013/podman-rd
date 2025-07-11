@@ -7,31 +7,16 @@
 
 > ⛔ **Requirements** 
 >
-> 🏷️ [**Local Environment:**  Config / Install Podman Locally](../localenv/config.md#install-podman-locally)
+> 🏷️ [**Local Environment:**  Config > Install Podman Locally](../localenv/config.md#install-podman-locally)
 
 ## Step 1: Create a Dockerfile 
-> 🏷️ [**Containerization:** Dockerfiles](../podman/dockerfiles.md)
+> 🏷️ [**Podman:** Dockerfiles](../podman/dockerfiles.md)
 
-## Step 2: Push Image to Remote Server
+## Step 2: Build an Image 
+> 🏷️ [**Local Environment:** Building Images](../localenv/building_images.md)
+
+## Step 3: Push Image to Remote Server
 > 🏷️ [**Local Environment:** Push To Remote Server](../localenv/push_to_remote_server.md)
 
-## Step 3: Extract image on Remote Server
-### 1. Open terminal and cd to dir containing image .tar
-### 2. Load image from **`.tar`**
-
-```shell
-$ podman load -i cmqapi.tar
-```
-
-## Step 4: Start App in Container
-### 1. Start a container
-```shell
-$ podman run -d -p 8080:8080 --name cmqapi localhost/cmqapi:latest
-```
-> ℹ️ **Note**
->
-> `-d` run detached
-> 
-> `-p` forward port on host to port on container
-> 
-> `--name` name of container
+## Step 4: Start a Container
+> 🏷️ [**Podman:** Running Containers](../podman/running_containers.md)

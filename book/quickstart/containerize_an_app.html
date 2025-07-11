@@ -174,30 +174,23 @@
 </blockquote>
 <blockquote>
 <p>⛔ <strong>Requirements</strong></p>
-<p>🏷️ <a href="../localenv/config.html#install-podman-locally"><strong>Local Environment:</strong>  Config / Install Podman Locally</a></p>
+<p>🏷️ <a href="../localenv/config.html#install-podman-locally"><strong>Local Environment:</strong>  Config &gt; Install Podman Locally</a></p>
 </blockquote>
 <h2 id="step-1-create-a-dockerfile"><a class="header" href="#step-1-create-a-dockerfile">Step 1: Create a Dockerfile</a></h2>
 <blockquote>
-<p>🏷️ <a href="../podman/dockerfiles.html"><strong>Containerization:</strong> Dockerfiles</a></p>
+<p>🏷️ <a href="../podman/dockerfiles.html"><strong>Podman:</strong> Dockerfiles</a></p>
 </blockquote>
-<h2 id="step-2-push-image-to-remote-server"><a class="header" href="#step-2-push-image-to-remote-server">Step 2: Push Image to Remote Server</a></h2>
+<h2 id="step-2-build-an-image"><a class="header" href="#step-2-build-an-image">Step 2: Build an Image</a></h2>
+<blockquote>
+<p>🏷️ <a href="../localenv/building_images.html"><strong>Local Environment:</strong> Building Images</a></p>
+</blockquote>
+<h2 id="step-3-push-image-to-remote-server"><a class="header" href="#step-3-push-image-to-remote-server">Step 3: Push Image to Remote Server</a></h2>
 <blockquote>
 <p>🏷️ <a href="../localenv/push_to_remote_server.html"><strong>Local Environment:</strong> Push To Remote Server</a></p>
 </blockquote>
-<h2 id="step-3-extract-image-on-remote-server"><a class="header" href="#step-3-extract-image-on-remote-server">Step 3: Extract image on Remote Server</a></h2>
-<h3 id="1-open-terminal-and-cd-to-dir-containing-image-tar"><a class="header" href="#1-open-terminal-and-cd-to-dir-containing-image-tar">1. Open terminal and cd to dir containing image .tar</a></h3>
-<h3 id="2-load-image-from-tar"><a class="header" href="#2-load-image-from-tar">2. Load image from <strong><code>.tar</code></strong></a></h3>
-<pre><code class="language-shell">$ podman load -i cmqapi.tar
-</code></pre>
-<h2 id="step-4-start-app-in-container"><a class="header" href="#step-4-start-app-in-container">Step 4: Start App in Container</a></h2>
-<h3 id="1-start-a-container"><a class="header" href="#1-start-a-container">1. Start a container</a></h3>
-<pre><code class="language-shell">$ podman run -d -p 8080:8080 --name cmqapi localhost/cmqapi:latest
-</code></pre>
+<h2 id="step-4-start-a-container"><a class="header" href="#step-4-start-a-container">Step 4: Start a Container</a></h2>
 <blockquote>
-<p>ℹ️ <strong>Note</strong></p>
-<p><code>-d</code> run detached</p>
-<p><code>-p</code> forward port on host to port on container</p>
-<p><code>--name</code> name of container</p>
+<p>🏷️ <a href="../podman/running_containers.html"><strong>Podman:</strong> Running Containers</a></p>
 </blockquote>
 
                     </main>

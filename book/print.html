@@ -181,11 +181,16 @@
 <div style="break-before: page; page-break-before: always;"></div><h1 id="building-images"><a class="header" href="#building-images">Building Images</a></h1>
 <blockquote>
 <p>⛔ <strong>Requirements</strong></p>
-<p>🏷️ <a href="localenv/../localenv/config.html#install_podman_locally"><strong>Local Environment</strong>: Config / Install Podman Locally</a></p>
+<p>🏷️ <a href="localenv/../localenv/config.html#install_podman_locally"><strong>Local Environment</strong>: Config &gt; Install Podman Locally</a></p>
 </blockquote>
 <h2 id="example-using-cadmqapi"><a class="header" href="#example-using-cadmqapi">Example using CAD.MQ.API</a></h2>
 <pre><code class="language-shell">$ podman build -f CAD.MQ.API/Dockerfile -t cadmq-api:latest .
 </code></pre>
+<blockquote>
+<p>ℹ️ <strong>Note</strong></p>
+<p><code>-f</code> path to Dockerfile</p>
+<p><code>-t</code> image tag name</p>
+</blockquote>
 <p>🔗 <a href="https://docs.podman.io/en/stable/markdown/podman-build.1.html" target="_blank">Documentation: podman-build</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="push-image-to-remote-server"><a class="header" href="#push-image-to-remote-server">Push Image to Remote Server</a></h1>
 <blockquote>
@@ -212,7 +217,7 @@ CAD CAD.API CAD.BL ... etc.
 <p>This is Podmans way of indicating that this is a "<em>local image</em>", and has not been pulled or pushed to a remote repository</p>
 </blockquote>
 <h2 id="4-push-tar-to-remote-server"><a class="header" href="#4-push-tar-to-remote-server">4. Push <strong><code>.tar</code></strong> to Remote Server</a></h2>
-<pre><code class="language-shell">$ scp myapp.tar cad@uit1446.govt.hcg.local:/home/cad
+<pre><code class="language-shell">$ scp myapp.tar username@uit1446.govt.hcg.local:/home/username
 </code></pre>
 <blockquote>
 <p>ℹ️ <strong>Note</strong></p>
@@ -220,6 +225,14 @@ CAD CAD.API CAD.BL ... etc.
 </blockquote>
 <h2 id="5-clean-up-tar"><a class="header" href="#5-clean-up-tar">5. Clean up <strong><code>.tar</code></strong></a></h2>
 <pre><code class="language-shell">$ rm myapp.tar
+</code></pre>
+<h2 id="6-connect-to-remote-server-as-user-via-ssh--log-into-cockpit"><a class="header" href="#6-connect-to-remote-server-as-user-via-ssh--log-into-cockpit">6. Connect to Remote Server as user via SSH / Log into Cockpit</a></h2>
+<h2 id="7-open-terminal-and-cd-to-homedir-containing-myapptar"><a class="header" href="#7-open-terminal-and-cd-to-homedir-containing-myapptar">7. Open terminal and cd to homedir containing myapp.tar</a></h2>
+<pre><code class="language-shell">$ pwd
+/home/username
+</code></pre>
+<h2 id="8-load-image-from-tar"><a class="header" href="#8-load-image-from-tar">8. Load image from <strong><code>.tar</code></strong></a></h2>
+<pre><code class="language-shell">$ podman load -i myapp.tar
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="config-1"><a class="header" href="#config-1">Config</a></h1>
 <h2 id="-"><a class="header" href="#-">... 🦗</a></h2>
@@ -231,12 +244,13 @@ CAD CAD.API CAD.BL ... etc.
 </blockquote>
 <h2 id="method-1-running-container-under-systemroot"><a class="header" href="#method-1-running-container-under-systemroot">Method 1: Running container under system(root)</a></h2>
 <blockquote>
-<p>ℹ️ <strong>Note</strong></p>
-<p>This is not advised. The nice thing about podman is that it allows us to run rootless containers in the first place...</p>
+<p>⚠️ <strong>Warning</strong></p>
+<p><em>This method is not advised.</em></p>
+<p>As a best practice, you shouldn't really be running privileged containers if you don't need to.</p>
 </blockquote>
 <blockquote>
 <p>⛔ <strong>Requirements</strong></p>
-<p>🏷️ <a href="podman/../localenv/push_to_remote_server.html">Push Image to Remote Server</a></p>
+<p>🏷️ <a href="podman/../localenv/push_to_remote_server.html"><strong>Local Environment:</strong> Push Image to Remote Server</a></p>
 </blockquote>
 <h3 id="1-share-image-with-systemroot-user"><a class="header" href="#1-share-image-with-systemroot-user">1. Share image with system/root user</a></h3>
 <pre><code class="language-shell">$ podman image scp USERNAME@localhost::$IMAGE root@localhost::
@@ -247,13 +261,22 @@ CAD CAD.API CAD.BL ... etc.
 <li>restart policy = always</li>
 <li>integration / port mapping = host: 8080 container: 8080 (just match dockerfile)</li>
 </ul>
-<h2 id="method-2-setting-up-container-to-run-as-a-systemd-service"><a class="header" href="#method-2-setting-up-container-to-run-as-a-systemd-service">Method 2: Setting up container to run as a systemd service</a></h2>
+<h2 id="method-2-setting-up-container-to-run-as-a-user-level-systemd-service"><a class="header" href="#method-2-setting-up-container-to-run-as-a-user-level-systemd-service">Method 2: Setting up container to run as a user-level <strong><code>systemd</code></strong> service</a></h2>
+<blockquote>
+<p>⚠️ <strong>Warning</strong></p>
+<p><em>This method is technically deprecated.</em></p>
+<p>Though many users still prefer this approach, it's now recommended to use 🏷️<a href="podman/../podman/autostart.html#method-3-quadlets"><strong>Podman:</strong> Autostart &gt; Quadlets</a></p>
+</blockquote>
 <blockquote>
 <p>ℹ️ <strong>Note</strong></p>
 <p>Following this guide from RHEL:</p>
 <p>🔗 <a href="https://www.redhat.com/en/blog/container-systemd-persist-reboot" target="_blank">Configure a container to start automatically as a systemd service</a></p>
-<p>This method is technically deprecated, though many users still prefer this approach - it's now recommended to use Quadlets when interacting with systemd</p>
+<p>This method leverages use of the <code>systemd --user</code></p>
+<p>The <code>systemd --user</code> instance privileges and lifecycle match those of the corresponding user.</p>
+<p><em>The user-level instance is distinct from the main, root-level <code>systemd</code> instance that manages the entire operating system, making this much safer to work with.</em></p>
 </blockquote>
+<p><span style="color: red"><strong>Important</strong></span></p>
+<p>Since we're bound to the corresponding user, our services won't actually start until this user has been logged in after reboot.</p>
 <h3 id="1-create-user-directory-for-service-file"><a class="header" href="#1-create-user-directory-for-service-file">1. Create user directory for <strong><code>.service</code></strong> file</a></h3>
 <blockquote>
 <p>⚠️<strong>Warning</strong></p>
@@ -265,7 +288,7 @@ CAD CAD.API CAD.BL ... etc.
 </code></pre>
 <h3 id="2-start-a-container"><a class="header" href="#2-start-a-container">2. Start a container</a></h3>
 <blockquote>
-<p>🏷️ <a href="podman/../podman/running_containers.html"><strong>Podman</strong>: Running Containers</a></p>
+<p>🏷️ <a href="podman/../podman/running_containers.html"><strong>Podman:</strong> Running Containers</a></p>
 </blockquote>
 <h3 id="3-generate-a-systemd-service-file"><a class="header" href="#3-generate-a-systemd-service-file">3. Generate a systemd <strong><code>.service</code></strong> file</a></h3>
 <pre><code class="language-shell">$ podman generate systemd --new --files --name myapp
@@ -285,15 +308,14 @@ CAD CAD.API CAD.BL ... etc.
 <h3 id="6-reload-user-level-systemctl-daemon"><a class="header" href="#6-reload-user-level-systemctl-daemon">6. Reload user level systemctl daemon</a></h3>
 <pre><code class="language-shell">$ systemctl --user daemon-reload
 </code></pre>
-<hr />
-<h3 id="now-we-can-start-containers-via-systemctl"><a class="header" href="#now-we-can-start-containers-via-systemctl">Now we can start containers via <strong><code>systemctl</code></strong></a></h3>
-<pre><code class="language-shell">$ systemctl --user start container-myapp.service
-</code></pre>
-<h3 id="addremove-from-systemd-services"><a class="header" href="#addremove-from-systemd-services">Add/Remove from systemd services</a></h3>
-<h4 id="add"><a class="header" href="#add">Add</a></h4>
+<h3 id="7-add-container-to-systemd---user-service"><a class="header" href="#7-add-container-to-systemd---user-service">7. Add container to <strong><code>systemd --user</code></strong> service</a></h3>
 <pre><code class="language-shell">$ systemctl --user enable container-cadmq-api.service
 </code></pre>
-<h4 id="remove"><a class="header" href="#remove">Remove</a></h4>
+<h3 id="additonal-commands"><a class="header" href="#additonal-commands">Additonal Commands</a></h3>
+<h4 id="manually-start-container-via-systemctl"><a class="header" href="#manually-start-container-via-systemctl">Manually start container via <strong><code>systemctl</code></strong></a></h4>
+<pre><code class="language-shell">$ systemctl --user start container-myapp.service
+</code></pre>
+<h4 id="remove-from-systemd-services"><a class="header" href="#remove-from-systemd-services">Remove from <strong><code>systemd</code></strong> services</a></h4>
 <pre><code class="language-shell">$ systemctl --user stop container-cadmq-api.service
 </code></pre>
 <h2 id="method-3-quadlets"><a class="header" href="#method-3-quadlets">Method 3: Quadlets</a></h2>
@@ -358,7 +380,16 @@ ENTRYPOINT ["dotnet", "CAD.MQ.API.dll"]
 </blockquote>
 <p>🔗 <a href="https://docs.docker.com/build/concepts/context/#dockerignore-files" target="_blank">.dockerignore</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="running-containers"><a class="header" href="#running-containers">Running Containers</a></h1>
-<p>https://docs.podman.io/en/stable/markdown/podman-run.1.html</p>
+<h2 id="example-using-cadmqapi-1"><a class="header" href="#example-using-cadmqapi-1">Example using CAD.MQ.API</a></h2>
+<pre><code class="language-shell">$ podman run -d -p 8080:8080 --name cmqapi localhost/cmqapi:latest
+</code></pre>
+<blockquote>
+<p>ℹ️ <strong>Note</strong></p>
+<p><code>-d</code> run detached</p>
+<p><code>-p</code> forward port on host to port on container</p>
+<p><code>--name</code> name of container</p>
+</blockquote>
+<p>🔗 <a href="podman/ https://docs.podman.io/en/stable/markdown/podman-run.1.html" target="_blank">Documentation: podman-run</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="config-2"><a class="header" href="#config-2">Config</a></h1>
 <h2 id="configure-firewalld-for-http"><a class="header" href="#configure-firewalld-for-http">Configure <strong><code>firewalld</code></strong> for http</a></h2>
 <p>🔗 <a href="https://www.redhat.com/en/blog/firewalld-linux-firewall">RHEL firewalld Docs</a></p>
@@ -405,7 +436,7 @@ sudo systemctl enable --now nginx
 <h2 id="setup"><a class="header" href="#setup">Setup:</a></h2>
 <blockquote>
 <p>⛔ <strong>Requirements</strong></p>
-<p>🏷️ <a href="rhel/nginx/../nginx/installation.html">Nginx: Installation</a></p>
+<p>🏷️ <a href="rhel/nginx/../nginx/installation.html"><strong>Nginx:</strong> Installation</a></p>
 </blockquote>
 <h3 id="1-set-up-custom-conf-inside-of-etcnginxconfd"><a class="header" href="#1-set-up-custom-conf-inside-of-etcnginxconfd">1. Set up custom conf inside of <code>/etc/nginx/conf.d/</code></a></h3>
 <blockquote>
@@ -472,30 +503,23 @@ sudo systemctl enable --now nginx
 </blockquote>
 <blockquote>
 <p>⛔ <strong>Requirements</strong></p>
-<p>🏷️ <a href="quickstart/../localenv/config.html#install-podman-locally"><strong>Local Environment:</strong>  Config / Install Podman Locally</a></p>
+<p>🏷️ <a href="quickstart/../localenv/config.html#install-podman-locally"><strong>Local Environment:</strong>  Config &gt; Install Podman Locally</a></p>
 </blockquote>
 <h2 id="step-1-create-a-dockerfile"><a class="header" href="#step-1-create-a-dockerfile">Step 1: Create a Dockerfile</a></h2>
 <blockquote>
-<p>🏷️ <a href="quickstart/../podman/dockerfiles.html"><strong>Containerization:</strong> Dockerfiles</a></p>
+<p>🏷️ <a href="quickstart/../podman/dockerfiles.html"><strong>Podman:</strong> Dockerfiles</a></p>
 </blockquote>
-<h2 id="step-2-push-image-to-remote-server"><a class="header" href="#step-2-push-image-to-remote-server">Step 2: Push Image to Remote Server</a></h2>
+<h2 id="step-2-build-an-image"><a class="header" href="#step-2-build-an-image">Step 2: Build an Image</a></h2>
+<blockquote>
+<p>🏷️ <a href="quickstart/../localenv/building_images.html"><strong>Local Environment:</strong> Building Images</a></p>
+</blockquote>
+<h2 id="step-3-push-image-to-remote-server"><a class="header" href="#step-3-push-image-to-remote-server">Step 3: Push Image to Remote Server</a></h2>
 <blockquote>
 <p>🏷️ <a href="quickstart/../localenv/push_to_remote_server.html"><strong>Local Environment:</strong> Push To Remote Server</a></p>
 </blockquote>
-<h2 id="step-3-extract-image-on-remote-server"><a class="header" href="#step-3-extract-image-on-remote-server">Step 3: Extract image on Remote Server</a></h2>
-<h3 id="1-open-terminal-and-cd-to-dir-containing-image-tar"><a class="header" href="#1-open-terminal-and-cd-to-dir-containing-image-tar">1. Open terminal and cd to dir containing image .tar</a></h3>
-<h3 id="2-load-image-from-tar"><a class="header" href="#2-load-image-from-tar">2. Load image from <strong><code>.tar</code></strong></a></h3>
-<pre><code class="language-shell">$ podman load -i cmqapi.tar
-</code></pre>
-<h2 id="step-4-start-app-in-container"><a class="header" href="#step-4-start-app-in-container">Step 4: Start App in Container</a></h2>
-<h3 id="1-start-a-container"><a class="header" href="#1-start-a-container">1. Start a container</a></h3>
-<pre><code class="language-shell">$ podman run -d -p 8080:8080 --name cmqapi localhost/cmqapi:latest
-</code></pre>
+<h2 id="step-4-start-a-container"><a class="header" href="#step-4-start-a-container">Step 4: Start a Container</a></h2>
 <blockquote>
-<p>ℹ️ <strong>Note</strong></p>
-<p><code>-d</code> run detached</p>
-<p><code>-p</code> forward port on host to port on container</p>
-<p><code>--name</code> name of container</p>
+<p>🏷️ <a href="quickstart/../podman/running_containers.html"><strong>Podman:</strong> Running Containers</a></p>
 </blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="sysadmin"><a class="header" href="#sysadmin">Sysadmin</a></h1>
 <blockquote>
