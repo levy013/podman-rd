@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>cad-containters</title>
+        <title>cad-containers</title>
         <meta name="robots" content="noindex">
 
 
@@ -135,7 +135,7 @@
                         </button>
                     </div>
 
-                    <h1 class="menu-title">cad-containters</h1>
+                    <h1 class="menu-title">cad-containers</h1>
 
                     <div class="right-buttons">
                         <a href="print.html" title="Print this book" aria-label="Print this book">
@@ -265,7 +265,8 @@ CAD CAD.API CAD.BL ... etc.
 <blockquote>
 <p>⚠️ <strong>Warning</strong></p>
 <p><em>This method is technically deprecated.</em></p>
-<p>Though many users still prefer this approach, it's now recommended to use 🏷️<a href="podman/../podman/autostart.html#method-3-quadlets"><strong>Podman:</strong> Autostart &gt; Quadlets</a></p>
+<p>Though many users still prefer this approach, it's now recommended to use:</p>
+<p>🏷️<a href="podman/../podman/autostart.html#method-3-quadlets"><strong>Podman:</strong> Autostart &gt; Quadlets</a></p>
 </blockquote>
 <blockquote>
 <p>ℹ️ <strong>Note</strong></p>
@@ -276,7 +277,10 @@ CAD CAD.API CAD.BL ... etc.
 <p><em>The user-level instance is distinct from the main, root-level <code>systemd</code> instance that manages the entire operating system, making this much safer to work with.</em></p>
 </blockquote>
 <p><span style="color: red"><strong>Important</strong></span></p>
-<p>Since we're bound to the corresponding user, our services won't actually start until this user has been logged in after reboot.</p>
+<p>Since our container(s) are bound to the corresponding <code>systemd --user</code> our services won't actually autostart until that user has been logged in after reboot. To solve this, we need to enable <code>linger</code> for that user.</p>
+<pre><code class="language-shell">$ sudo loginctl enable-linger &lt;username&gt;
+</code></pre>
+<p>This will allow us to persist the <code>systemd --user</code> session via the root level <code>systemd</code> session even after all interactive logins have ended. This way our container(s) will launch on server boot.</p>
 <h3 id="1-create-user-directory-for-service-file"><a class="header" href="#1-create-user-directory-for-service-file">1. Create user directory for <strong><code>.service</code></strong> file</a></h3>
 <blockquote>
 <p>⚠️<strong>Warning</strong></p>
@@ -320,6 +324,11 @@ CAD CAD.API CAD.BL ... etc.
 </code></pre>
 <h2 id="method-3-quadlets"><a class="header" href="#method-3-quadlets">Method 3: Quadlets</a></h2>
 <h3 id="--1"><a class="header" href="#--1">... 🦗</a></h3>
+<p><span style="color: red"><strong>Important</strong></span></p>
+<p>Since our container(s) are bound to the corresponding <code>systemd --user</code> our services won't actually autostart until that user has been logged in after reboot. To solve this, we need to enable <code>linger</code> for that user.</p>
+<pre><code class="language-shell">$ sudo loginctl enable-linger &lt;username&gt;
+</code></pre>
+<p>This will allow us to persist the <code>systemd --user</code> session via the root level <code>systemd</code> session even after all interactive logins have ended. This way our containers will launch on server boot.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="dockerfiles"><a class="header" href="#dockerfiles">Dockerfiles</a></h1>
 <h2 id="what-is-a-dockerfile"><a class="header" href="#what-is-a-dockerfile">What is a dockerfile?</a></h2>
 <blockquote>
@@ -413,9 +422,9 @@ $ sudo firewall-cmd --reload
 <div style="break-before: page; page-break-before: always;"></div><h1 id="nginx"><a class="header" href="#nginx">Nginx</a></h1>
 <h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
 <p>🔗 <a href="https://nginx.org/en/docs/index.html" target="_blank">Nginx Documentation</a></p>
-<pre><code class="language-shell">sudo dnf install nginx
-
-sudo systemctl enable --now nginx
+<pre><code class="language-shell">$ sudo dnf install nginx
+</code></pre>
+<pre><code class="language-shell">$ sudo systemctl enable --now nginx
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="nginx-1"><a class="header" href="#nginx-1">Nginx</a></h1>
 <h2 id="what-is-a-reverse-proxy"><a class="header" href="#what-is-a-reverse-proxy">What is a reverse proxy?</a></h2>
@@ -431,7 +440,12 @@ sudo systemctl enable --now nginx
 <ul>
 <li>We have an application running on the server exposed on <code>:8080</code></li>
 <li>Clients can natively make requests to the service on <code>http://uit1446:8080/</code></li>
-<li>With a reverse proxy, we can set a custom hostname for our URI: <code>http://cadlnx/mq/</code></li>
+<li>With a reverse proxy we can:
+<ul>
+<li>set a custom hostname for our URI: <code>http://cadlnx</code></li>
+<li>replace the port with a URI as a path to a resource on the server: <code>http://uit1446/mq/</code></li>
+</ul>
+</li>
 </ul>
 <h2 id="setup"><a class="header" href="#setup">Setup:</a></h2>
 <blockquote>
@@ -447,9 +461,12 @@ sudo systemctl enable --now nginx
 <h3 id="2-add-the-reverse-proxy-config"><a class="header" href="#2-add-the-reverse-proxy-config">2. Add the reverse proxy config</a></h3>
 <pre><code class="language-nginx">server { 
         listen 80; # what port Nginx should listen on
-        server_name cadlnx; # what hostname the following location block(s) should respond to
+
+        # The server_name can be used to determine what hostname the following location blocks should respond to.
+        # In our case, the f5 will handle thisfor us, so we can comment/remove the following line:
+        # server_name cad; 
          
-        location /mq/ { # location block containing rules/logic for handling requests to http://cadlnx/mq/*
+        location /mq/ { # location block containing rules/logic for handling requests to http://hostname/mq/*
                 rewrite ^/mq/(.*)$ /$1 break; 
                 proxy_pass http://127.0.0.1:8080; # underlying address we're proxying traffic to 
 
@@ -459,7 +476,7 @@ sudo systemctl enable --now nginx
                 proxy_set_header X-Forwarded-Proto $scheme; # http or https 
         }
 
-        location /foo/ { # e.g. some other location block for handling http://cadlnx/foo/
+        location /foo/ { # e.g. some other location block for handling http://hostname/foo/
                 ...
         }
 } 
@@ -488,6 +505,12 @@ sudo systemctl enable --now nginx
 <li><code>/$1</code> - replacement to append parameters from capture group to '/'</li>
 </ul>
 </blockquote>
+<h3 id="3-test-nginx-configuration"><a class="header" href="#3-test-nginx-configuration">3. Test Nginx configuration</a></h3>
+<pre><code class="language-nginx">$ sudo nginx -t
+</code></pre>
+<h3 id="4-reload-nginx"><a class="header" href="#4-reload-nginx">4. Reload Nginx</a></h3>
+<pre><code class="language-nginx">$ sudo nginx -s reload
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="nginx-2"><a class="header" href="#nginx-2">Nginx</a></h1>
 <h2 id="error-log"><a class="header" href="#error-log">Error Log:</a></h2>
 <pre><code class="language-shell">$ sudo less /var/log/nginx/error.log
@@ -522,47 +545,13 @@ sudo systemctl enable --now nginx
 <p>🏷️ <a href="quickstart/../podman/running_containers.html"><strong>Podman:</strong> Running Containers</a></p>
 </blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="sysadmin"><a class="header" href="#sysadmin">Sysadmin</a></h1>
+<h2 id="todos"><a class="header" href="#todos">Todos</a></h2>
 <blockquote>
-<p>When we spin up new servers, there are certain configurations that the sysadmins can set up by default.</p>
+<p>🏷️ <a href="sysadmin/../rhel/config.html#configure-firewalld-for-http">Configure firewalld for http</a></p>
+<p>🏷️ <a href="sysadmin/../rhel/config.html#selinux">Allow services to make outbound network connections in SELinux</a></p>
 </blockquote>
-<ol>
-<li><a href="sysadmin/../rhel/config.html#configure-firewalld-for-http">Add HTTP to firewalld</a></li>
-</ol>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="todos"><a class="header" href="#todos">TODOs</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="todos-1"><a class="header" href="#todos-1">TODOs</a></h1>
 <ul>
-<li>
-<p><input disabled="" type="checkbox" checked=""/>
-Figure out Application URLs</p>
-<ul>
-<li>Solved w/ reverse proxy</li>
-</ul>
-</li>
-<li>
-<p><input disabled="" type="checkbox" checked=""/>
-Figure out CADConfig.json</p>
-</li>
-<li>
-<p><input disabled="" type="checkbox" checked=""/>
-Install Podman GUI and work</p>
-<ul>
-<li>Unnecessary for the current workflow (esp w/ the rollout script)</li>
-<li>Maybe pulling images down to work on them locally but right now it's not something I've looked into.</li>
-</ul>
-</li>
-<li>
-<p><input disabled="" type="checkbox" checked=""/>
-Look into Container auto starting after server patching/restarting</p>
-<ul>
-<li>Working through a couple solutions, but successfully implemented with systemd unit file and by deploying container directly as system (root) user</li>
-</ul>
-</li>
-<li>
-<p><input disabled="" type="checkbox" checked=""/>
-Generic CAD user to manage apps</p>
-<ul>
-<li>Running apps under your own user doesn't really make sense... just created 'CAD' user to deploy from for now</li>
-</ul>
-</li>
 <li>
 <p><input disabled="" type="checkbox"/>
 Look into quadlets</p>
@@ -602,6 +591,22 @@ Jonathan: Re-image uit1446</p>
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 

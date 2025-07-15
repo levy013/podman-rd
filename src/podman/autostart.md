@@ -32,7 +32,9 @@ $ podman image scp USERNAME@localhost::$IMAGE root@localhost::
 >
 > *This method is technically deprecated.*
 >
-> Though many users still prefer this approach, it's now recommended to use 🏷️[**Podman:** Autostart > Quadlets](../podman/autostart.md#method-3-quadlets) 
+> Though many users still prefer this approach, it's now recommended to use:
+>
+> 🏷️[**Podman:** Autostart > Quadlets](../podman/autostart.md#method-3-quadlets) 
 
 > ℹ️ **Note**
 >
@@ -48,9 +50,12 @@ $ podman image scp USERNAME@localhost::$IMAGE root@localhost::
 
 <span style="color: red">**Important**</span>
 
-Since we're bound to the corresponding user, our services won't actually start until this user has been logged in after reboot.
+Since our container(s) are bound to the corresponding `systemd --user` our services won't actually autostart until that user has been logged in after reboot. To solve this, we need to enable `linger` for that user. 
+```shell
+$ sudo loginctl enable-linger <username>
+```
 
-
+This will allow us to persist the `systemd --user` session via the root level `systemd` session even after all interactive logins have ended. This way our container(s) will launch on server boot.
 
 ### 1. Create user directory for **`.service`** file
 > ⚠️**Warning**
@@ -112,3 +117,12 @@ $ systemctl --user stop container-cadmq-api.service
 
 ## Method 3: Quadlets
 ### ... 🦗
+<span style="color: red">**Important**</span>
+
+Since our container(s) are bound to the corresponding `systemd --user` our services won't actually autostart until that user has been logged in after reboot. To solve this, we need to enable `linger` for that user. 
+```shell
+$ sudo loginctl enable-linger <username>
+```
+
+This will allow us to persist the `systemd --user` session via the root level `systemd` session even after all interactive logins have ended. This way our containers will launch on server boot.
+

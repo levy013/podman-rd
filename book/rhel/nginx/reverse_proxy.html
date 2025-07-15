@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Reverse Proxy - cad-containters</title>
+        <title>Reverse Proxy - cad-containers</title>
 
 
         <!-- Custom HTML head -->
@@ -134,7 +134,7 @@
                         </button>
                     </div>
 
-                    <h1 class="menu-title">cad-containters</h1>
+                    <h1 class="menu-title">cad-containers</h1>
 
                     <div class="right-buttons">
                         <a href="../../print.html" title="Print this book" aria-label="Print this book">
@@ -180,7 +180,12 @@
 <ul>
 <li>We have an application running on the server exposed on <code>:8080</code></li>
 <li>Clients can natively make requests to the service on <code>http://uit1446:8080/</code></li>
-<li>With a reverse proxy, we can set a custom hostname for our URI: <code>http://cadlnx/mq/</code></li>
+<li>With a reverse proxy we can:
+<ul>
+<li>set a custom hostname for our URI: <code>http://cadlnx</code></li>
+<li>replace the port with a URI as a path to a resource on the server: <code>http://uit1446/mq/</code></li>
+</ul>
+</li>
 </ul>
 <h2 id="setup"><a class="header" href="#setup">Setup:</a></h2>
 <blockquote>
@@ -196,9 +201,12 @@
 <h3 id="2-add-the-reverse-proxy-config"><a class="header" href="#2-add-the-reverse-proxy-config">2. Add the reverse proxy config</a></h3>
 <pre><code class="language-nginx">server { 
         listen 80; # what port Nginx should listen on
-        server_name cadlnx; # what hostname the following location block(s) should respond to
+
+        # The server_name can be used to determine what hostname the following location blocks should respond to.
+        # In our case, the f5 will handle thisfor us, so we can comment/remove the following line:
+        # server_name cad; 
          
-        location /mq/ { # location block containing rules/logic for handling requests to http://cadlnx/mq/*
+        location /mq/ { # location block containing rules/logic for handling requests to http://hostname/mq/*
                 rewrite ^/mq/(.*)$ /$1 break; 
                 proxy_pass http://127.0.0.1:8080; # underlying address we're proxying traffic to 
 
@@ -208,7 +216,7 @@
                 proxy_set_header X-Forwarded-Proto $scheme; # http or https 
         }
 
-        location /foo/ { # e.g. some other location block for handling http://cadlnx/foo/
+        location /foo/ { # e.g. some other location block for handling http://hostname/foo/
                 ...
         }
 } 
@@ -237,6 +245,12 @@
 <li><code>/$1</code> - replacement to append parameters from capture group to '/'</li>
 </ul>
 </blockquote>
+<h3 id="3-test-nginx-configuration"><a class="header" href="#3-test-nginx-configuration">3. Test Nginx configuration</a></h3>
+<pre><code class="language-nginx">$ sudo nginx -t
+</code></pre>
+<h3 id="4-reload-nginx"><a class="header" href="#4-reload-nginx">4. Reload Nginx</a></h3>
+<pre><code class="language-nginx">$ sudo nginx -s reload
+</code></pre>
 
                     </main>
 
@@ -267,6 +281,22 @@
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 

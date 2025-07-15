@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Sysadmin - cad-containters</title>
+        <title>Sysadmin - cad-containers</title>
 
 
         <!-- Custom HTML head -->
@@ -134,7 +134,7 @@
                         </button>
                     </div>
 
-                    <h1 class="menu-title">cad-containters</h1>
+                    <h1 class="menu-title">cad-containers</h1>
 
                     <div class="right-buttons">
                         <a href="../print.html" title="Print this book" aria-label="Print this book">
@@ -167,12 +167,11 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="sysadmin"><a class="header" href="#sysadmin">Sysadmin</a></h1>
+<h2 id="todos"><a class="header" href="#todos">Todos</a></h2>
 <blockquote>
-<p>When we spin up new servers, there are certain configurations that the sysadmins can set up by default.</p>
+<p>🏷️ <a href="../rhel/config.html#configure-firewalld-for-http">Configure firewalld for http</a></p>
+<p>🏷️ <a href="../rhel/config.html#selinux">Allow services to make outbound network connections in SELinux</a></p>
 </blockquote>
-<ol>
-<li><a href="../rhel/config.html#configure-firewalld-for-http">Add HTTP to firewalld</a></li>
-</ol>
 
                     </main>
 
@@ -203,6 +202,22 @@
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 

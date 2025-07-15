@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Autostart - cad-containters</title>
+        <title>Autostart - cad-containers</title>
 
 
         <!-- Custom HTML head -->
@@ -134,7 +134,7 @@
                         </button>
                     </div>
 
-                    <h1 class="menu-title">cad-containters</h1>
+                    <h1 class="menu-title">cad-containers</h1>
 
                     <div class="right-buttons">
                         <a href="../print.html" title="Print this book" aria-label="Print this book">
@@ -195,7 +195,8 @@
 <blockquote>
 <p>⚠️ <strong>Warning</strong></p>
 <p><em>This method is technically deprecated.</em></p>
-<p>Though many users still prefer this approach, it's now recommended to use 🏷️<a href="../podman/autostart.html#method-3-quadlets"><strong>Podman:</strong> Autostart &gt; Quadlets</a></p>
+<p>Though many users still prefer this approach, it's now recommended to use:</p>
+<p>🏷️<a href="../podman/autostart.html#method-3-quadlets"><strong>Podman:</strong> Autostart &gt; Quadlets</a></p>
 </blockquote>
 <blockquote>
 <p>ℹ️ <strong>Note</strong></p>
@@ -206,7 +207,10 @@
 <p><em>The user-level instance is distinct from the main, root-level <code>systemd</code> instance that manages the entire operating system, making this much safer to work with.</em></p>
 </blockquote>
 <p><span style="color: red"><strong>Important</strong></span></p>
-<p>Since we're bound to the corresponding user, our services won't actually start until this user has been logged in after reboot.</p>
+<p>Since our container(s) are bound to the corresponding <code>systemd --user</code> our services won't actually autostart until that user has been logged in after reboot. To solve this, we need to enable <code>linger</code> for that user.</p>
+<pre><code class="language-shell">$ sudo loginctl enable-linger &lt;username&gt;
+</code></pre>
+<p>This will allow us to persist the <code>systemd --user</code> session via the root level <code>systemd</code> session even after all interactive logins have ended. This way our container(s) will launch on server boot.</p>
 <h3 id="1-create-user-directory-for-service-file"><a class="header" href="#1-create-user-directory-for-service-file">1. Create user directory for <strong><code>.service</code></strong> file</a></h3>
 <blockquote>
 <p>⚠️<strong>Warning</strong></p>
@@ -250,6 +254,11 @@
 </code></pre>
 <h2 id="method-3-quadlets"><a class="header" href="#method-3-quadlets">Method 3: Quadlets</a></h2>
 <h3 id="-"><a class="header" href="#-">... 🦗</a></h3>
+<p><span style="color: red"><strong>Important</strong></span></p>
+<p>Since our container(s) are bound to the corresponding <code>systemd --user</code> our services won't actually autostart until that user has been logged in after reboot. To solve this, we need to enable <code>linger</code> for that user.</p>
+<pre><code class="language-shell">$ sudo loginctl enable-linger &lt;username&gt;
+</code></pre>
+<p>This will allow us to persist the <code>systemd --user</code> session via the root level <code>systemd</code> session even after all interactive logins have ended. This way our containers will launch on server boot.</p>
 
                     </main>
 
@@ -280,6 +289,22 @@
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 

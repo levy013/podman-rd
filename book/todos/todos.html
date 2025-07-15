@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>TODOs - cad-containters</title>
+        <title>TODOs - cad-containers</title>
 
 
         <!-- Custom HTML head -->
@@ -134,7 +134,7 @@
                         </button>
                     </div>
 
-                    <h1 class="menu-title">cad-containters</h1>
+                    <h1 class="menu-title">cad-containers</h1>
 
                     <div class="right-buttons">
                         <a href="../print.html" title="Print this book" aria-label="Print this book">
@@ -168,39 +168,6 @@
                     <main>
                         <h1 id="todos"><a class="header" href="#todos">TODOs</a></h1>
 <ul>
-<li>
-<p><input disabled="" type="checkbox" checked=""/>
-Figure out Application URLs</p>
-<ul>
-<li>Solved w/ reverse proxy</li>
-</ul>
-</li>
-<li>
-<p><input disabled="" type="checkbox" checked=""/>
-Figure out CADConfig.json</p>
-</li>
-<li>
-<p><input disabled="" type="checkbox" checked=""/>
-Install Podman GUI and work</p>
-<ul>
-<li>Unnecessary for the current workflow (esp w/ the rollout script)</li>
-<li>Maybe pulling images down to work on them locally but right now it's not something I've looked into.</li>
-</ul>
-</li>
-<li>
-<p><input disabled="" type="checkbox" checked=""/>
-Look into Container auto starting after server patching/restarting</p>
-<ul>
-<li>Working through a couple solutions, but successfully implemented with systemd unit file and by deploying container directly as system (root) user</li>
-</ul>
-</li>
-<li>
-<p><input disabled="" type="checkbox" checked=""/>
-Generic CAD user to manage apps</p>
-<ul>
-<li>Running apps under your own user doesn't really make sense... just created 'CAD' user to deploy from for now</li>
-</ul>
-</li>
 <li>
 <p><input disabled="" type="checkbox"/>
 Look into quadlets</p>
@@ -246,6 +213,22 @@ Jonathan: Re-image uit1446</p>
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 

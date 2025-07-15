@@ -18,7 +18,9 @@ A reverse proxy will allow us to specify a hostname and it's relative path(s) fo
 Here is an example using CAD.MQ.API
 - We have an application running on the server exposed on `:8080`
 - Clients can natively make requests to the service on `http://uit1446:8080/`
-- With a reverse proxy, we can set a custom hostname for our URI: `http://cadlnx/mq/`
+- With a reverse proxy we can:
+   - set a custom hostname for our URI: `http://cadlnx` 
+   - replace the port with a URI as a path to a resource on the server: `http://uit1446/mq/`
 
 ## Setup:
 
@@ -37,9 +39,12 @@ Here is an example using CAD.MQ.API
 ```nginx
 server { 
         listen 80; # what port Nginx should listen on
-        server_name cadlnx; # what hostname the following location block(s) should respond to
+
+        # The server_name can be used to determine what hostname the following location blocks should respond to.
+        # In our case, the f5 will handle thisfor us, so we can comment/remove the following line:
+        # server_name cad; 
          
-        location /mq/ { # location block containing rules/logic for handling requests to http://cadlnx/mq/*
+        location /mq/ { # location block containing rules/logic for handling requests to http://hostname/mq/*
                 rewrite ^/mq/(.*)$ /$1 break; 
                 proxy_pass http://127.0.0.1:8080; # underlying address we're proxying traffic to 
 
@@ -49,7 +54,7 @@ server {
                 proxy_set_header X-Forwarded-Proto $scheme; # http or https 
         }
 
-        location /foo/ { # e.g. some other location block for handling http://cadlnx/foo/
+        location /foo/ { # e.g. some other location block for handling http://hostname/foo/
                 ...
         }
 } 
@@ -76,3 +81,13 @@ server {
 >    - `(.*)` - wildcard for capture group
 >    - `$` - anchor to match end of string
 >    - `/$1` - replacement to append parameters from capture group to '/'
+
+### 3. Test Nginx configuration
+```nginx
+$ sudo nginx -t
+```
+
+### 4. Reload Nginx
+```nginx
+$ sudo nginx -s reload
+```

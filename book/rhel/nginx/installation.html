@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Installation - cad-containters</title>
+        <title>Installation - cad-containers</title>
 
 
         <!-- Custom HTML head -->
@@ -134,7 +134,7 @@
                         </button>
                     </div>
 
-                    <h1 class="menu-title">cad-containters</h1>
+                    <h1 class="menu-title">cad-containers</h1>
 
                     <div class="right-buttons">
                         <a href="../../print.html" title="Print this book" aria-label="Print this book">
@@ -169,9 +169,9 @@
                         <h1 id="nginx"><a class="header" href="#nginx">Nginx</a></h1>
 <h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
 <p>🔗 <a href="https://nginx.org/en/docs/index.html" target="_blank">Nginx Documentation</a></p>
-<pre><code class="language-shell">sudo dnf install nginx
-
-sudo systemctl enable --now nginx
+<pre><code class="language-shell">$ sudo dnf install nginx
+</code></pre>
+<pre><code class="language-shell">$ sudo systemctl enable --now nginx
 </code></pre>
 
                     </main>
@@ -203,6 +203,22 @@ sudo systemctl enable --now nginx
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 
